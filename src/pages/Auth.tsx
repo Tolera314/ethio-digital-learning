@@ -8,6 +8,9 @@ import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import AuthHeroImage from "@/components/auth/AuthHeroImage";
 
+const bgImage =
+  "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80";
+
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -16,26 +19,37 @@ const Auth = () => {
     "transition-all duration-500 ease-in-out";
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row items-center justify-center bg-black/90 relative overflow-hidden">
-      {/* Glowing Animated Circles */}
-      <div className="absolute top-10 left-[-80px] w-[320px] h-[320px] rounded-full bg-magenta-pink/20 blur-3xl pointer-events-none animate-[pulse_4s_infinite] z-0"></div>
-      <div className="absolute bottom-[-90px] right-[-60px] w-[370px] h-[370px] rounded-full bg-vivid-purple/20 blur-3xl pointer-events-none animate-[pulse_6s_infinite] z-0"></div>
+    <div className="min-h-screen w-full flex flex-col md:flex-row items-center justify-center relative overflow-hidden">
+      {/* Full-Page Background Image */}
+      <div className="absolute inset-0 w-full h-full -z-10">
+        <img
+          src={bgImage}
+          alt="Students learning together"
+          className="w-full h-full object-cover object-center brightness-60 saturate-115"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/70 to-vivid-purple/70"></div>
+      </div>
 
-      <div className="w-full md:w-[480px] z-10 flex justify-center items-center p-0 md:p-10 animate-scale-in">
+      {/* Glowing Animated Circles - subtle for learning vibe */}
+      <div className="absolute top-8 left-[-80px] w-[260px] h-[260px] rounded-full bg-magenta-pink/20 blur-3xl pointer-events-none animate-[pulse_4s_infinite] z-0"></div>
+      <div className="absolute bottom-[-70px] right-[-60px] w-[300px] h-[300px] rounded-full bg-vivid-purple/30 blur-3xl pointer-events-none animate-[pulse_6s_infinite] z-0"></div>
+
+      {/* Auth Card Section */}
+      <div className="w-full md:w-[430px] z-10 flex justify-center items-center px-2 py-10 md:p-12 animate-scale-in">
         <Card
           className={cn(
-            "glass-morphism w-full shadow-2xl px-8 py-8 md:px-10 border-0 bg-black/60 backdrop-blur-3xl relative animate-fade-in",
+            "glass-morphism w-full shadow-2xl px-7 py-8 md:px-10 border-0 bg-black/60 backdrop-blur-3xl relative animate-fade-in",
             "rounded-3xl"
           )}
         >
           {/* Tab Toggle */}
-          <div className="flex justify-center mb-8">
+          <div className="flex justify-center mb-8 gap-2">
             <button
               className={cn(
                 "w-1/2 py-2 text-xl font-semibold rounded-t-lg focus:outline-none transition-all",
                 !isSignUp
                   ? "bg-vivid-purple text-white shadow-lg"
-                  : "bg-transparent text-gray-400"
+                  : "bg-transparent text-gray-300"
               )}
               onClick={() => setIsSignUp(false)}
               aria-label="Sign In"
@@ -48,7 +62,7 @@ const Auth = () => {
                 "w-1/2 py-2 text-xl font-semibold rounded-t-lg focus:outline-none transition-all",
                 isSignUp
                   ? "bg-vivid-purple text-white shadow-lg"
-                  : "bg-transparent text-gray-400"
+                  : "bg-transparent text-gray-300"
               )}
               onClick={() => setIsSignUp(true)}
               aria-label="Sign Up"
@@ -72,27 +86,27 @@ const Auth = () => {
             >
               <label className="relative">
                 <span className="sr-only">Email</span>
-                <Mail className="absolute left-3 top-3.5 text-gray-500" size={18} />
+                <Mail className="absolute left-3 top-3.5 text-vivid-purple" size={18} />
                 <Input
                   autoFocus={!isSignUp}
                   type="email"
                   placeholder="Email"
-                  className="pl-10 bg-black/30 border-white/10 text-white placeholder-gray-500"
+                  className="pl-10 bg-black/30 border-white/10 text-white placeholder-gray-400"
                   required
                 />
               </label>
               <label className="relative">
                 <span className="sr-only">Password</span>
-                <Lock className="absolute left-3 top-3.5 text-gray-500" size={18} />
+                <Lock className="absolute left-3 top-3.5 text-vivid-purple" size={18} />
                 <Input
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
-                  className="pl-10 pr-10 bg-black/30 border-white/10 text-white placeholder-gray-500"
+                  className="pl-10 pr-10 bg-black/30 border-white/10 text-white placeholder-gray-400"
                   required
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-3 text-gray-400"
+                  className="absolute right-3 top-3 text-gray-300"
                   tabIndex={-1}
                   onClick={() => setShowPassword(v => !v)}
                 >
@@ -100,7 +114,7 @@ const Auth = () => {
                 </button>
               </label>
               <div className="flex justify-between text-xs mt-[-0.5rem]">
-                <span></span>
+                <span />
                 <button
                   type="button"
                   className="hover:underline text-gray-400"
@@ -113,7 +127,7 @@ const Auth = () => {
               <Button
                 type="submit"
                 className={cn(
-                  "bg-vivid-purple hover:bg-magenta-pink text-white py-2 px-6 mt-2 rounded-xl text-lg font-semibold shadow-lg transition-all drop-shadow-glow hover:scale-105",
+                  "bg-gradient-to-r from-vivid-purple via-magenta-pink to-vivid-purple hover:from-magenta-pink hover:to-vivid-purple text-white py-2 px-6 mt-2 rounded-xl text-lg font-semibold shadow-lg transition-all drop-shadow-glow hover-scale",
                   "focus:ring focus:ring-magenta-pink/40"
                 )}
               >
@@ -123,7 +137,7 @@ const Auth = () => {
                 New here?{" "}
                 <button
                   type="button"
-                  className="text-vivid-purple font-bold hover:underline"
+                  className="text-magenta-pink font-bold hover:underline"
                   onClick={() => setIsSignUp(true)}
                 >
                   Create an account
@@ -143,27 +157,27 @@ const Auth = () => {
             >
               <label className="relative">
                 <span className="sr-only">Email</span>
-                <Mail className="absolute left-3 top-3.5 text-gray-500" size={18} />
+                <Mail className="absolute left-3 top-3.5 text-vivid-purple" size={18} />
                 <Input
                   autoFocus={isSignUp}
                   type="email"
                   placeholder="Email"
-                  className="pl-10 bg-black/30 border-white/10 text-white placeholder-gray-500"
+                  className="pl-10 bg-black/30 border-white/10 text-white placeholder-gray-400"
                   required
                 />
               </label>
               <label className="relative">
                 <span className="sr-only">Password</span>
-                <Lock className="absolute left-3 top-3.5 text-gray-500" size={18} />
+                <Lock className="absolute left-3 top-3.5 text-vivid-purple" size={18} />
                 <Input
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
-                  className="pl-10 pr-10 bg-black/30 border-white/10 text-white placeholder-gray-500"
+                  className="pl-10 pr-10 bg-black/30 border-white/10 text-white placeholder-gray-400"
                   required
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-3 text-gray-400"
+                  className="absolute right-3 top-3 text-gray-300"
                   tabIndex={-1}
                   onClick={() => setShowPassword((v) => !v)}
                 >
@@ -172,18 +186,18 @@ const Auth = () => {
               </label>
               <label className="relative">
                 <span className="sr-only">Confirm Password</span>
-                <Lock className="absolute left-3 top-3.5 text-gray-500" size={18} />
+                <Lock className="absolute left-3 top-3.5 text-vivid-purple" size={18} />
                 <Input
                   type={showPassword ? "text" : "password"}
                   placeholder="Confirm Password"
-                  className="pl-10 pr-10 bg-black/30 border-white/10 text-white placeholder-gray-500"
+                  className="pl-10 pr-10 bg-black/30 border-white/10 text-white placeholder-gray-400"
                   required
                 />
               </label>
               <Button
                 type="submit"
                 className={cn(
-                  "bg-vivid-purple hover:bg-magenta-pink text-white py-2 px-6 mt-2 rounded-xl text-lg font-semibold shadow-lg transition-all drop-shadow-glow hover:scale-105",
+                  "bg-gradient-to-r from-magenta-pink via-vivid-purple to-magenta-pink hover:from-vivid-purple hover:to-magenta-pink text-white py-2 px-6 mt-2 rounded-xl text-lg font-semibold shadow-lg transition-all drop-shadow-glow hover-scale",
                   "focus:ring focus:ring-vivid-purple/30"
                 )}
               >
@@ -193,7 +207,7 @@ const Auth = () => {
                 Already have an account?{" "}
                 <button
                   type="button"
-                  className="text-vivid-purple font-bold hover:underline"
+                  className="text-magenta-pink font-bold hover:underline"
                   onClick={() => setIsSignUp(false)}
                 >
                   Sign In
@@ -202,22 +216,26 @@ const Auth = () => {
             </form>
           </div>
           {/* Inspirational Quote or Brand */}
-          <div className="mt-8 text-center text-md italic font-semibold text-gray-300 animate-fade-in delay-150">
-            "Unlock a world of knowledge. Dream. Learn. Achieve."
+          <div className="mt-10 text-center text-md italic font-semibold text-white/90 animate-fade-in delay-150">
+            <span className="block bg-gradient-to-r from-magenta-pink via-vivid-purple to-blue-400 bg-clip-text text-transparent">
+              "Unlock a world of knowledge. Dream. Learn. Achieve."
+            </span>
           </div>
           {/* Back to Home */}
           <Link
             to="/"
-            className="block mt-4 text-xs text-gray-500 hover:text-vivid-purple hover:underline transition-colors"
+            className="block mt-5 text-xs text-gray-400 hover:text-vivid-purple hover:underline transition-colors"
           >
             &larr; Back to Home
           </Link>
         </Card>
       </div>
 
+      {/* AuthHeroImage only for md+ screens - looks good alongside glass card */}
       <AuthHeroImage />
     </div>
   );
 };
 
 export default Auth;
+

@@ -1,9 +1,9 @@
 
 import React from "react";
 
-// Example Unsplash learning image
+// Example Unsplash learning image with dark mode adaptation
 const AuthHeroImage = () => (
-  <div className="hidden md:flex flex-1 flex-col items-center justify-center px-6">
+  <div className="hidden md:flex flex-1 flex-col items-center justify-center px-6 bg-black/20">
     <img
       src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=600&q=80"
       alt="Monitor showing code - Learning"
@@ -11,9 +11,10 @@ const AuthHeroImage = () => (
       style={{
         border: "4px solid rgba(155, 135, 245, 0.2)",
         boxShadow: "0 10px 50px 0 #9b87f520",
+        filter: "brightness(0.7) contrast(1.2)"
       }}
     />
-    <p className="mt-8 text-lg italic text-gray-600 dark:text-gray-200 text-center px-2 font-medium">
+    <p className="mt-8 text-lg italic text-gray-300 text-center px-2 font-medium">
       "Unlock your tech skills with immersive online courses." <br />
       <span className="text-vivid-purple font-bold">Ethio Digital Academy</span>
     </p>

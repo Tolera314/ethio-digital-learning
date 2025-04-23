@@ -1,6 +1,4 @@
 
-// Modern Auth Page with Magic UI and Hero Image
-
 import React, { useState } from "react";
 import { Mail, Lock, Eye, EyeOff, UserPlus, LogIn } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -14,20 +12,19 @@ const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Animation transition class
   const transitionClass =
     "transition-all duration-500 ease-in-out";
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row items-center justify-center bg-gradient-to-br from-vivid-purple via-primary-purple to-dark-purple relative overflow-hidden">
+    <div className="min-h-screen flex flex-col md:flex-row items-center justify-center bg-black/90 relative overflow-hidden">
       {/* Glowing Animated Circles */}
-      <div className="absolute top-10 left-[-80px] w-[320px] h-[320px] rounded-full bg-magenta-pink/30 blur-3xl pointer-events-none animate-[pulse_4s_infinite] z-0"></div>
-      <div className="absolute bottom-[-90px] right-[-60px] w-[370px] h-[370px] rounded-full bg-ocean-blue/20 blur-3xl pointer-events-none animate-[pulse_6s_infinite] z-0"></div>
+      <div className="absolute top-10 left-[-80px] w-[320px] h-[320px] rounded-full bg-magenta-pink/20 blur-3xl pointer-events-none animate-[pulse_4s_infinite] z-0"></div>
+      <div className="absolute bottom-[-90px] right-[-60px] w-[370px] h-[370px] rounded-full bg-vivid-purple/20 blur-3xl pointer-events-none animate-[pulse_6s_infinite] z-0"></div>
 
       <div className="w-full md:w-[480px] z-10 flex justify-center items-center p-0 md:p-10 animate-scale-in">
         <Card
           className={cn(
-            "glass-morphism w-full shadow-2xl px-8 py-8 md:px-10 border-0 bg-white/80 dark:bg-dark-purple/80 backdrop-blur-3xl relative animate-fade-in",
+            "glass-morphism w-full shadow-2xl px-8 py-8 md:px-10 border-0 bg-black/60 backdrop-blur-3xl relative animate-fade-in",
             "rounded-3xl"
           )}
         >
@@ -38,7 +35,7 @@ const Auth = () => {
                 "w-1/2 py-2 text-xl font-semibold rounded-t-lg focus:outline-none transition-all",
                 !isSignUp
                   ? "bg-vivid-purple text-white shadow-lg"
-                  : "bg-transparent text-mid-gray"
+                  : "bg-transparent text-gray-400"
               )}
               onClick={() => setIsSignUp(false)}
               aria-label="Sign In"
@@ -51,7 +48,7 @@ const Auth = () => {
                 "w-1/2 py-2 text-xl font-semibold rounded-t-lg focus:outline-none transition-all",
                 isSignUp
                   ? "bg-vivid-purple text-white shadow-lg"
-                  : "bg-transparent text-mid-gray"
+                  : "bg-transparent text-gray-400"
               )}
               onClick={() => setIsSignUp(true)}
               aria-label="Sign Up"
@@ -75,22 +72,22 @@ const Auth = () => {
             >
               <label className="relative">
                 <span className="sr-only">Email</span>
-                <Mail className="absolute left-3 top-3.5 text-gray-400" size={18} />
+                <Mail className="absolute left-3 top-3.5 text-gray-500" size={18} />
                 <Input
                   autoFocus={!isSignUp}
                   type="email"
                   placeholder="Email"
-                  className="pl-10"
+                  className="pl-10 bg-black/30 border-white/10 text-white placeholder-gray-500"
                   required
                 />
               </label>
               <label className="relative">
                 <span className="sr-only">Password</span>
-                <Lock className="absolute left-3 top-3.5 text-gray-400" size={18} />
+                <Lock className="absolute left-3 top-3.5 text-gray-500" size={18} />
                 <Input
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
-                  className="pl-10 pr-10"
+                  className="pl-10 pr-10 bg-black/30 border-white/10 text-white placeholder-gray-500"
                   required
                 />
                 <button
@@ -106,7 +103,7 @@ const Auth = () => {
                 <span></span>
                 <button
                   type="button"
-                  className="hover:underline text-mid-gray"
+                  className="hover:underline text-gray-400"
                   disabled
                   tabIndex={-1}
                 >
@@ -122,7 +119,7 @@ const Auth = () => {
               >
                 Sign In
               </Button>
-              <div className="mt-4 text-sm text-center text-gray-500">
+              <div className="mt-4 text-sm text-center text-gray-400">
                 New here?{" "}
                 <button
                   type="button"
@@ -146,22 +143,22 @@ const Auth = () => {
             >
               <label className="relative">
                 <span className="sr-only">Email</span>
-                <Mail className="absolute left-3 top-3.5 text-gray-400" size={18} />
+                <Mail className="absolute left-3 top-3.5 text-gray-500" size={18} />
                 <Input
                   autoFocus={isSignUp}
                   type="email"
                   placeholder="Email"
-                  className="pl-10"
+                  className="pl-10 bg-black/30 border-white/10 text-white placeholder-gray-500"
                   required
                 />
               </label>
               <label className="relative">
                 <span className="sr-only">Password</span>
-                <Lock className="absolute left-3 top-3.5 text-gray-400" size={18} />
+                <Lock className="absolute left-3 top-3.5 text-gray-500" size={18} />
                 <Input
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
-                  className="pl-10 pr-10"
+                  className="pl-10 pr-10 bg-black/30 border-white/10 text-white placeholder-gray-500"
                   required
                 />
                 <button
@@ -175,11 +172,11 @@ const Auth = () => {
               </label>
               <label className="relative">
                 <span className="sr-only">Confirm Password</span>
-                <Lock className="absolute left-3 top-3.5 text-gray-400" size={18} />
+                <Lock className="absolute left-3 top-3.5 text-gray-500" size={18} />
                 <Input
                   type={showPassword ? "text" : "password"}
                   placeholder="Confirm Password"
-                  className="pl-10 pr-10"
+                  className="pl-10 pr-10 bg-black/30 border-white/10 text-white placeholder-gray-500"
                   required
                 />
               </label>
@@ -192,7 +189,7 @@ const Auth = () => {
               >
                 Sign Up
               </Button>
-              <div className="mt-4 text-sm text-center text-gray-500">
+              <div className="mt-4 text-sm text-center text-gray-400">
                 Already have an account?{" "}
                 <button
                   type="button"
@@ -205,13 +202,13 @@ const Auth = () => {
             </form>
           </div>
           {/* Inspirational Quote or Brand */}
-          <div className="mt-8 text-center text-md italic font-semibold text-gray-600 animate-fade-in delay-150">
-            “Unlock a world of knowledge. Dream. Learn. Achieve.”
+          <div className="mt-8 text-center text-md italic font-semibold text-gray-300 animate-fade-in delay-150">
+            "Unlock a world of knowledge. Dream. Learn. Achieve."
           </div>
           {/* Back to Home */}
           <Link
             to="/"
-            className="block mt-4 text-xs text-gray-400 hover:text-vivid-purple hover:underline transition-colors"
+            className="block mt-4 text-xs text-gray-500 hover:text-vivid-purple hover:underline transition-colors"
           >
             &larr; Back to Home
           </Link>
@@ -219,7 +216,6 @@ const Auth = () => {
       </div>
 
       <AuthHeroImage />
-
     </div>
   );
 };

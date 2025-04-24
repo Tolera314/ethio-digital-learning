@@ -35,16 +35,16 @@ const PageLayout = ({ children, title, subtitle, backgroundImage }: PageLayoutPr
       </div>
       
       {/* Navbar */}
-      <header className="relative z-10 flex items-center justify-between px-6 py-4 bg-black/40 backdrop-blur-md">
-        <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent drop-shadow-glow hover:drop-shadow-xl transition">
+      <header className="relative z-10 flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-4 bg-black/40 backdrop-blur-md">
+        <Link to="/" className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent drop-shadow-glow hover:drop-shadow-xl transition mb-4 sm:mb-0">
           Ethio Digital Academy
         </Link>
-        <nav className="flex gap-2 md:gap-6 overflow-x-auto pb-1">
+        <nav className="flex flex-wrap justify-center gap-2 md:gap-4 overflow-x-auto pb-1">
           {navLinks.map(link => (
             <Link
               key={link.label}
               to={link.to}
-              className="flex items-center gap-2 px-3 py-1 rounded-full text-gray-200 hover:bg-purple-600/30 hover:text-white transition font-semibold text-sm story-link whitespace-nowrap"
+              className="flex items-center gap-2 px-3 py-1 rounded-full text-gray-200 hover:bg-purple-600/30 hover:text-white transition font-semibold text-xs sm:text-sm story-link whitespace-nowrap"
             >
               {link.icon}
               <span>{link.label}</span>
@@ -52,21 +52,21 @@ const PageLayout = ({ children, title, subtitle, backgroundImage }: PageLayoutPr
           ))}
           <Link
             to="/auth"
-            className="inline-flex items-center px-5 py-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold ml-2 shadow-lg hover:scale-105 transition hover:bg-pink-600 focus:ring-2 focus:ring-pink-400/70 whitespace-nowrap"
+            className="inline-flex items-center px-4 sm:px-5 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold shadow-lg hover:scale-105 transition hover:bg-pink-600 focus:ring-2 focus:ring-pink-400/70 whitespace-nowrap text-xs sm:text-sm"
           >
-            <LogIn className="mr-2" size={20} /> Login
+            <LogIn className="mr-2" size={16} sm:size={20} /> Login
           </Link>
         </nav>
       </header>
 
       {/* Page Content */}
-      <main className="flex-1 flex flex-col justify-center items-center relative z-10 px-4 py-10">
-        <div className="glass-morphism p-8 rounded-3xl shadow-2xl max-w-4xl w-full text-center animate-fade-in mb-8 mt-10">
-          <h1 className="text-3xl md:text-4xl font-extrabold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent drop-shadow-glow">
+      <main className="flex-1 flex flex-col relative z-10 px-4 py-6 sm:py-10">
+        <div className="glass-morphism p-6 sm:p-8 rounded-3xl shadow-2xl max-w-4xl mx-auto w-full text-center animate-fade-in mb-8 mt-4 sm:mt-10">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-3 sm:mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent drop-shadow-glow">
             {title}
           </h1>
           {subtitle && (
-            <p className="text-lg text-gray-200 font-medium mb-6">
+            <p className="text-base sm:text-lg text-gray-200 font-medium mb-4 sm:mb-6">
               {subtitle}
             </p>
           )}
@@ -74,7 +74,7 @@ const PageLayout = ({ children, title, subtitle, backgroundImage }: PageLayoutPr
         </div>
       </main>
 
-      <footer className="z-10 relative text-center text-gray-400 py-3 bg-black/60 mt-auto">
+      <footer className="z-10 relative text-center text-gray-400 py-3 bg-black/60 mt-auto text-xs sm:text-sm">
         © Ethio Digital Academy {new Date().getFullYear()}
       </footer>
     </div>

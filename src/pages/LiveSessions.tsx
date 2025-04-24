@@ -94,19 +94,19 @@ const SessionCard = ({ session, isPast = false }: { session: any; isPast?: boole
     <CardContent className="pb-4">
       <div className="grid grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm mb-4">
         <div className="flex items-center gap-2">
-          <Calendar size={14} className="text-blue-400" />
+          <Calendar className="text-blue-400 w-3.5 h-3.5 sm:w-4 sm:h-4" />
           <span className="text-gray-300">{session.date}</span>
         </div>
         <div className="flex items-center gap-2">
-          <Clock size={14} className="text-purple-400" />
+          <Clock className="text-purple-400 w-3.5 h-3.5 sm:w-4 sm:h-4" />
           <span className="text-gray-300">{session.time}</span>
         </div>
         <div className="flex items-center gap-2">
-          <Users size={14} className="text-green-400" />
+          <Users className="text-green-400 w-3.5 h-3.5 sm:w-4 sm:h-4" />
           <span className="text-gray-300">{session.participants} participants</span>
         </div>
         <div className="flex items-center gap-2">
-          <Video size={14} className="text-red-400" />
+          <Video className="text-red-400 w-3.5 h-3.5 sm:w-4 sm:h-4" />
           <span className="text-gray-300">{session.category}</span>
         </div>
       </div>
@@ -114,7 +114,7 @@ const SessionCard = ({ session, isPast = false }: { session: any; isPast?: boole
     <CardFooter className="border-t border-white/5 pt-4">
       {isPast ? (
         <Button className="w-full bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white text-sm">
-          <Video size={14} className="mr-2" /> Watch Recording
+          <Video className="mr-2 w-4 h-4" /> Watch Recording
         </Button>
       ) : (
         <div className="flex w-full flex-col sm:flex-row gap-2">
@@ -122,7 +122,7 @@ const SessionCard = ({ session, isPast = false }: { session: any; isPast?: boole
             Join Session
           </Button>
           <Button variant="outline" className="w-full sm:w-auto border-white/20 hover:bg-white/10 text-sm">
-            <Bell size={14} /> Remind
+            <Bell className="w-4 h-4 mr-1" /> Remind
           </Button>
         </div>
       )}
@@ -151,7 +151,7 @@ const LiveSessions = () => {
           <TabsContent value="upcoming" className="mt-0">
             <div className="glass-morphism p-4 sm:p-6 rounded-xl mb-8 max-w-xl mx-auto">
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <CalendarIcon size={32} className="text-blue-400 sm:w-10 sm:h-10" />
+                <CalendarIcon className="text-blue-400 w-8 h-8 sm:w-10 sm:h-10" />
                 <div className="text-center sm:text-left">
                   <h2 className="text-xl sm:text-2xl font-bold text-white">Join Our Next Session</h2>
                   <p className="text-sm sm:text-base text-gray-300">Advanced React Hooks - May 5, 2025</p>

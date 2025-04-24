@@ -91,11 +91,11 @@ const CourseCard = ({ course }: { course: typeof courses[0] }) => (
     <CardContent className="text-xs sm:text-sm text-gray-400">
       <div className="grid grid-cols-2 gap-2 sm:gap-4">
         <div className="flex items-center gap-2">
-          <Clock size={14} sm:size={16} className="text-blue-400" />
+          <Clock className="text-blue-400 w-3.5 h-3.5 sm:w-4 sm:h-4" />
           <span>{course.duration}</span>
         </div>
         <div className="flex items-center gap-2">
-          <Users size={14} sm:size={16} className="text-green-400" />
+          <Users className="text-green-400 w-3.5 h-3.5 sm:w-4 sm:h-4" />
           <span>{course.students.toLocaleString()} students</span>
         </div>
       </div>

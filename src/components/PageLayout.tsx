@@ -54,7 +54,7 @@ const PageLayout = ({ children, title, subtitle, backgroundImage }: PageLayoutPr
             to="/auth"
             className="inline-flex items-center px-4 sm:px-5 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold shadow-lg hover:scale-105 transition hover:bg-pink-600 focus:ring-2 focus:ring-pink-400/70 whitespace-nowrap text-xs sm:text-sm"
           >
-            <LogIn className="mr-2" size={16} sm:size={20} /> Login
+            <LogIn className="mr-2 w-4 h-4 sm:w-5 sm:h-5" /> Login
           </Link>
         </nav>
       </header>

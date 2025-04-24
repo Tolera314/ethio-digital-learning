@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -150,7 +151,7 @@ const LiveSessions = () => {
           <TabsContent value="upcoming" className="mt-0">
             <div className="glass-morphism p-4 sm:p-6 rounded-xl mb-8 max-w-xl mx-auto">
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <CalendarIcon size={32} sm:size={40} className="text-blue-400" />
+                <CalendarIcon size={32} className="text-blue-400 sm:w-10 sm:h-10" />
                 <div className="text-center sm:text-left">
                   <h2 className="text-xl sm:text-2xl font-bold text-white">Join Our Next Session</h2>
                   <p className="text-sm sm:text-base text-gray-300">Advanced React Hooks - May 5, 2025</p>

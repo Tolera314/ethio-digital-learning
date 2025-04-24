@@ -106,23 +106,12 @@ const Index = () => {
               Join thousands of students who are already advancing their careers with our courses and expert-led sessions.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button
-                as={Link}
-                to="/auth"
-                className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold shadow-lg hover:shadow-purple-500/20"
-                size="lg"
-              >
+              <Link to="/auth" className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold shadow-lg hover:shadow-purple-500/20 rounded-full flex items-center justify-center">
                 <LogIn className="mr-2" size={20} /> Sign Up Now
-              </Button>
-              <Button
-                as={Link}
-                to="/courses"
-                className="px-8 py-3 border border-white/20 hover:bg-white/10"
-                variant="outline"
-                size="lg"
-              >
+              </Link>
+              <Link to="/courses" className="px-8 py-3 border border-white/20 hover:bg-white/10 text-white rounded-full flex items-center justify-center">
                 Browse Courses
-              </Button>
+              </Link>
             </div>
           </div>
         </div>

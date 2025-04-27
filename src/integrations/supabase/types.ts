@@ -9,7 +9,80 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      books: {
+        Row: {
+          author: string
+          available: boolean | null
+          category: string
+          cover_image: string | null
+          created_at: string
+          description: string | null
+          id: string
+          publication_year: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author: string
+          available?: boolean | null
+          category: string
+          cover_image?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          publication_year?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author?: string
+          available?: boolean | null
+          category?: string
+          cover_image?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          publication_year?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_books: {
+        Row: {
+          book_id: string
+          created_at: string
+          id: string
+          last_read_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          id?: string
+          last_read_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          id?: string
+          last_read_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_books_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

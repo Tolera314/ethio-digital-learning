@@ -1,7 +1,7 @@
 
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { LogIn, BookOpen, Home, GalleryHorizontal, Image as ImageIcon, Award, TrendingUp, Video, Users, Book } from "lucide-react";
+import { LogIn, BookOpen, Home, GalleryHorizontal, Image as ImageIcon, Award, TrendingUp, Video, Users, Book, MapPin, Phone } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useEffect } from "react";
 

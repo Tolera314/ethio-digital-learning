@@ -2,6 +2,8 @@
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { LogIn, BookOpen, Home, GalleryHorizontal, Image as ImageIcon, Award, TrendingUp, Video, Users, Book } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState, useEffect } from "react";
 
 const navLinks = [
   { to: "/", label: "Home", icon: <Home size={18} /> },
@@ -22,10 +24,20 @@ interface PageLayoutProps {
 }
 
 const PageLayout = ({ children, title, subtitle, backgroundImage }: PageLayoutProps) => {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <div className="relative min-h-screen flex flex-col bg-black">
       {/* Background image with dark overlay */}
-      <div className="absolute inset-0 w-full h-full z-0">
+      <div className="fixed inset-0 w-full h-full z-0">
         {backgroundImage ? (
           <img
             src={backgroundImage}
@@ -39,7 +51,7 @@ const PageLayout = ({ children, title, subtitle, backgroundImage }: PageLayoutPr
       </div>
       
       {/* Navbar */}
-      <header className="relative z-10 flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-4 bg-black/40 backdrop-blur-md">
+      <header className={`sticky top-0 z-50 flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-4 transition-all duration-300 ${scrolled ? 'bg-black/80 backdrop-blur-md shadow-lg' : 'bg-black/40 backdrop-blur-sm'}`}>
         <Link to="/" className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent drop-shadow-glow hover:drop-shadow-xl transition mb-4 sm:mb-0">
           Ethio Digital Academy
         </Link>
@@ -65,7 +77,7 @@ const PageLayout = ({ children, title, subtitle, backgroundImage }: PageLayoutPr
 
       {/* Page Content */}
       <main className="flex-1 flex flex-col relative z-10 px-4 py-6 sm:py-10">
-        <div className="glass-morphism p-6 sm:p-8 rounded-3xl shadow-2xl max-w-4xl mx-auto w-full text-center animate-fade-in mb-8 mt-4 sm:mt-10">
+        <div className="glass-morphism p-6 sm:p-8 rounded-3xl shadow-2xl max-w-7xl mx-auto w-full text-center animate-fade-in mb-8 mt-4 sm:mt-10">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-3 sm:mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent drop-shadow-glow">
             {title}
           </h1>

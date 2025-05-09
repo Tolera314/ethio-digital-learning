@@ -10,8 +10,8 @@ const navLinks = [
   { to: "/live-sessions", label: "Live Sessions", icon: <Video size={18} /> },
   { to: "/certificates", label: "Certificates", icon: <Award size={18} /> },
   { to: "/progress", label: "Progress", icon: <TrendingUp size={18} /> },
-  { to: "/about", label: "About", icon: <GalleryHorizontal size={18} /> },
-  { to: "/contact", label: "Contact", icon: <ImageIcon size={18} /> }
+  { to: "/about", label: "About", icon: <Users size={18} /> },
+  { to: "/contact", label: "Contact", icon: <GalleryHorizontal size={18} /> }
 ];
 
 interface PageLayoutProps {

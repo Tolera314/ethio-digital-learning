@@ -3,11 +3,15 @@ import { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, Users, Video, Calendar as CalendarIcon, Bell } from "lucide-react";
+import { Calendar, Clock, Users, Video, Calendar as CalendarIcon, Bell, Plus } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import CreateSessionModal from "@/components/CreateSessionModal";
+import JoinSessionModal from "@/components/JoinSessionModal";
+import VideoCall from "@/components/VideoCall";
+import { useToast } from "@/hooks/use-toast";
 
-const upcomingSessions = [
+const initialUpcomingSessions = [
   {
     id: 1,
     title: "Advanced React Hooks",
@@ -70,7 +74,15 @@ const pastSessions = [
   }
 ];
 
-const SessionCard = ({ session, isPast = false }: { session: any; isPast?: boolean }) => (
+const SessionCard = ({ 
+  session, 
+  isPast = false, 
+  onJoin 
+}: { 
+  session: any; 
+  isPast?: boolean; 
+  onJoin?: (session: any) => void;
+}) => (
   <Card className="overflow-hidden bg-black/40 border border-white/10 backdrop-blur-lg shadow-lg hover:shadow-purple-500/20 transition-all duration-300 transform hover:-translate-y-1">
     <div className="relative h-32 sm:h-40">
       <img 
@@ -118,7 +130,10 @@ const SessionCard = ({ session, isPast = false }: { session: any; isPast?: boole
         </Button>
       ) : (
         <div className="flex w-full flex-col sm:flex-row gap-2">
-          <Button className="w-full sm:flex-1 bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white text-sm">
+          <Button 
+            className="w-full sm:flex-1 bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white text-sm"
+            onClick={() => onJoin && onJoin(session)}
+          >
             Join Session
           </Button>
           <Button variant="outline" className="w-full sm:w-auto border-white/20 hover:bg-white/10 text-sm">
@@ -131,6 +146,67 @@ const SessionCard = ({ session, isPast = false }: { session: any; isPast?: boole
 );
 
 const LiveSessions = () => {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+  const [selectedSession, setSelectedSession] = useState<any>(null);
+  const [activeVideoCall, setActiveVideoCall] = useState<boolean>(false);
+  const [currentUsername, setCurrentUsername] = useState<string>("");
+  const [currentEmail, setCurrentEmail] = useState<string>("");
+  const [upcomingSessions, setUpcomingSessions] = useState(initialUpcomingSessions);
+  const { toast } = useToast();
+
+  const handleCreateSession = (newSession: any) => {
+    setUpcomingSessions([newSession, ...upcomingSessions]);
+    toast({
+      title: "Session Created",
+      description: "Your live session has been successfully created"
+    });
+  };
+
+  const handleJoinSession = (session: any) => {
+    setSelectedSession(session);
+    setIsJoinModalOpen(true);
+  };
+
+  const handleStartVideoCall = (username: string, email: string) => {
+    setCurrentUsername(username);
+    setCurrentEmail(email);
+    setActiveVideoCall(true);
+    toast({
+      title: "Session Joined",
+      description: "You have successfully joined the live session"
+    });
+  };
+
+  const handleExitVideoCall = () => {
+    setActiveVideoCall(false);
+    setSelectedSession(null);
+    toast({
+      title: "Session Left",
+      description: "You have left the live session"
+    });
+  };
+
+  if (activeVideoCall && selectedSession) {
+    return (
+      <PageLayout
+        title={`Live Session: ${selectedSession.title}`}
+        subtitle="Video Call in Progress"
+        backgroundImage="https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=1200&q=80"
+      >
+        <div className="w-full max-w-7xl mx-auto">
+          <VideoCall
+            sessionId={selectedSession.id.toString()}
+            username={currentUsername}
+            email={currentEmail}
+            isHost={false}
+            onExit={handleExitVideoCall}
+          />
+        </div>
+      </PageLayout>
+    );
+  }
+
   return (
     <PageLayout 
       title="Live Learning Sessions" 
@@ -138,6 +214,15 @@ const LiveSessions = () => {
       backgroundImage="https://images.unsplash.com/photo-1476357471311-43c0db9fb2b4?auto=format&fit=crop&w=1200&q=80"
     >
       <div className="w-full max-w-7xl mx-auto px-4">
+        <div className="flex justify-end mb-6">
+          <Button
+            className="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white"
+            onClick={() => setIsCreateModalOpen(true)}
+          >
+            <Plus className="mr-2 h-4 w-4" /> Host New Session
+          </Button>
+        </div>
+
         <Tabs defaultValue="upcoming" className="w-full">
           <TabsList className="grid grid-cols-2 bg-black/30 border border-white/10 mb-8 w-full">
             <TabsTrigger value="upcoming" className="data-[state=active]:bg-purple-800/50">
@@ -161,7 +246,11 @@ const LiveSessions = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-8">
               {upcomingSessions.map(session => (
-                <SessionCard key={session.id} session={session} />
+                <SessionCard 
+                  key={session.id} 
+                  session={session} 
+                  onJoin={handleJoinSession}
+                />
               ))}
             </div>
           </TabsContent>
@@ -175,6 +264,20 @@ const LiveSessions = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Modals */}
+      <CreateSessionModal
+        open={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSessionCreated={handleCreateSession}
+      />
+
+      <JoinSessionModal
+        open={isJoinModalOpen}
+        onClose={() => setIsJoinModalOpen(false)}
+        session={selectedSession}
+        onJoin={handleStartVideoCall}
+      />
     </PageLayout>
   );
 };

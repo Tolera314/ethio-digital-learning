@@ -1,11 +1,15 @@
 
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { LogIn, BookOpen, Home, GalleryHorizontal, Image as ImageIcon } from "lucide-react";
+import { LogIn, BookOpen, Home, GalleryHorizontal, Image as ImageIcon, Award, TrendingUp, Video, Users, Book } from "lucide-react";
 
 const navLinks = [
   { to: "/", label: "Home", icon: <Home size={18} /> },
   { to: "/courses", label: "Courses", icon: <BookOpen size={18} /> },
+  { to: "/library", label: "Library", icon: <Book size={18} /> },
+  { to: "/live-sessions", label: "Live Sessions", icon: <Video size={18} /> },
+  { to: "/certificates", label: "Certificates", icon: <Award size={18} /> },
+  { to: "/progress", label: "Progress", icon: <TrendingUp size={18} /> },
   { to: "/about", label: "About", icon: <GalleryHorizontal size={18} /> },
   { to: "/contact", label: "Contact", icon: <ImageIcon size={18} /> }
 ];

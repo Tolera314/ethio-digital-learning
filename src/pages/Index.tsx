@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { LogIn, BookOpen, Home, GalleryHorizontal, Image as ImageIcon, Award, TrendingUp, Video, Users, CreditCard } from "lucide-react";
+import { LogIn, BookOpen, Home, GalleryHorizontal, Image as ImageIcon, Award, TrendingUp, Video, Users, CreditCard, Book, Library } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
@@ -12,6 +12,7 @@ const navLinks = [
 
 const featureLinks = [
   { to: "/courses", label: "Structured Courses", icon: <BookOpen size={20} className="text-purple-400" />, description: "Learn from our curated courses" },
+  { to: "/library", label: "Digital Library", icon: <Book size={20} className="text-blue-400" />, description: "Access our collection of e-books" },
   { to: "/certificates", label: "Certificates", icon: <Award size={20} className="text-yellow-400" />, description: "Earn industry-recognized certificates" },
   { to: "/progress", label: "Progress Tracking", icon: <TrendingUp size={20} className="text-green-400" />, description: "Track your learning journey" },
   { to: "/live-sessions", label: "Live Sessions", icon: <Video size={20} className="text-blue-400" />, description: "Join interactive learning events" },
@@ -33,9 +34,9 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-black/95 via-black/90 to-violet-900/80" />
       </div>
       {/* Navbar */}
-      <header className="relative z-10 flex items-center justify-between px-6 py-4 bg-black/40 backdrop-blur-md">
-        <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent drop-shadow-glow hover:drop-shadow-xl transition">Ethio Digital Academy</Link>
-        <nav className="flex gap-2 md:gap-6">
+      <header className="relative z-10 flex flex-col sm:flex-row items-center justify-between px-6 py-4 bg-black/40 backdrop-blur-md">
+        <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent drop-shadow-glow hover:drop-shadow-xl transition mb-4 sm:mb-0">Ethio Digital Academy</Link>
+        <nav className="flex flex-wrap gap-2 md:gap-4 justify-center">
           {navLinks.map(link => (
             <Link
               key={link.label}
@@ -63,12 +64,20 @@ const Index = () => {
           <p className="text-lg md:text-xl text-gray-200 font-medium mb-7">
             The magic of online learning! <span className="block text-pink-400">Interactive Courses, Smart Progress Tracking, and Live Sessions</span>
           </p>
-          <Link
-            to="/courses"
-            className="inline-block mt-2 px-8 py-3 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold text-lg shadow-md hover:scale-105 transition-all hover:bg-pink-700 duration-200 animate-scale-in"
-          >
-            Explore Courses
-          </Link>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Link
+              to="/courses"
+              className="px-8 py-3 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold text-lg shadow-md hover:scale-105 transition-all hover:bg-pink-700 duration-200 animate-scale-in"
+            >
+              Explore Courses
+            </Link>
+            <Link
+              to="/library"
+              className="px-8 py-3 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold text-lg shadow-md hover:scale-105 transition-all hover:bg-indigo-700 duration-200 animate-scale-in"
+            >
+              Browse Library
+            </Link>
+          </div>
           <p className="mt-8 text-base text-gray-400 animate-fade-in">
             Start your journey toward mastery <span className="text-purple-300 font-bold">&#9733;</span>
           </p>

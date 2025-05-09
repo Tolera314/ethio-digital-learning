@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { LogIn, BookOpen, Home, GalleryHorizontal, Image as ImageIcon, Award, TrendingUp, Video, Users, CreditCard, Book, Library, Mail, ChevronRight, Star, Check, ArrowRight } from "lucide-react";
+import { LogIn, BookOpen, Home, GalleryHorizontal, Image as ImageIcon, Award, TrendingUp, Video, Users, CreditCard, Book, Library, Mail, ChevronRight, Star, Check, ArrowRight, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";

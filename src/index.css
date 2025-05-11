@@ -37,4 +37,24 @@
   .glass-morphism {
     @apply backdrop-blur-xl bg-black/30 border border-white/10 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.3)];
   }
+  
+  .bg-size-200 {
+    background-size: 200% auto;
+  }
+  
+  .hover-scale {
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .hover-scale:hover {
+    transform: scale(1.03);
+  }
+  
+  .bg-right-bottom {
+    background-position: right bottom;
+  }
+  
+  .drop-shadow-glow {
+    filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.3));
+  }
 }

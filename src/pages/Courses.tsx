@@ -1,147 +1,365 @@
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from 'react';
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Book, Users, Clock, Star, Award } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Filter, Star, Users, Clock, ChevronRight, BookOpen, TrendingUp, Award, CheckCircle, SearchIcon } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import PageLayout from "@/components/PageLayout";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import CallToAction from "@/components/CallToAction";
+import PageHeader from "@/components/PageHeader";
+import { supabase } from "@/integrations/supabase/client";
 
-const courses = [
+const categories = [
+  "All Courses",
+  "Web Development",
+  "Data Science",
+  "UI/UX Design",
+  "Mobile Development",
+  "Digital Marketing",
+  "Cloud Computing"
+];
+
+const featuredCourses = [
   {
     id: 1,
-    title: "Web Development Fundamentals",
-    description: "Learn HTML, CSS, and JavaScript basics to build responsive websites.",
-    category: "beginner",
-    duration: "8 weeks",
-    students: 857,
+    title: "Web Development Bootcamp",
+    description: "Learn HTML, CSS, JavaScript and React to become a full-stack web developer",
+    duration: "12 weeks",
+    level: "Beginner to Intermediate",
+    image: "https://images.unsplash.com/photo-1593720213428-28a5b9e94613?auto=format&fit=crop&w=600&q=80",
+    price: "19,999 ETB",
     rating: 4.8,
-    image: "https://images.unsplash.com/photo-1593720219276-0b1eacd0aef4?auto=format&fit=crop&w=800&q=80"
+    students: 1245
   },
   {
     id: 2,
-    title: "React.js Advanced Concepts",
-    description: "Master React hooks, context API, and performance optimization techniques.",
-    category: "advanced",
-    duration: "10 weeks",
-    students: 642,
+    title: "UI/UX Design Masterclass",
+    description: "Master user experience design and create beautiful interfaces that users love",
+    duration: "8 weeks",
+    level: "All Levels",
+    image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=600&q=80",
+    price: "15,999 ETB",
     rating: 4.9,
-    image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=800&q=80"
+    students: 987
   },
   {
     id: 3,
-    title: "Full Stack Development with MERN",
-    description: "Build complete web applications with MongoDB, Express, React, and Node.js.",
-    category: "intermediate",
-    duration: "12 weeks",
-    students: 724,
+    title: "Data Science Fundamentals",
+    description: "Learn Python, data analysis, visualization and machine learning basics",
+    duration: "10 weeks",
+    level: "Intermediate",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80",
+    price: "17,999 ETB",
     rating: 4.7,
-    image: "https://images.unsplash.com/photo-1534665482403-a909d0d97c67?auto=format&fit=crop&w=800&q=80"
+    students: 823
   },
   {
     id: 4,
-    title: "UX/UI Design Principles",
-    description: "Learn modern design techniques and create beautiful, user-friendly interfaces.",
-    category: "beginner",
-    duration: "6 weeks",
-    students: 516,
+    title: "Mobile App Development with Flutter",
+    description: "Build cross-platform mobile apps for Android and iOS with Flutter",
+    duration: "10 weeks",
+    level: "Intermediate",
+    image: "https://images.unsplash.com/photo-1573804633927-bfcbcd909acd?auto=format&fit=crop&w=600&q=80",
+    price: "18,999 ETB",
     rating: 4.6,
-    image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=800&q=80"
+    students: 756
   },
   {
     id: 5,
-    title: "Mobile App Development",
-    description: "Create native apps for iOS and Android using React Native.",
-    category: "intermediate",
-    duration: "10 weeks",
-    students: 589,
-    rating: 4.7,
-    image: "https://images.unsplash.com/photo-1555774698-0b77e0d5fac6?auto=format&fit=crop&w=800&q=80"
+    title: "Digital Marketing Strategy",
+    description: "Learn digital marketing fundamentals, social media, SEO and content marketing",
+    duration: "6 weeks",
+    level: "Beginner",
+    image: "https://images.unsplash.com/photo-1533750516659-7d29bda71f97?auto=format&fit=crop&w=600&q=80",
+    price: "12,999 ETB",
+    rating: 4.5,
+    students: 689
   },
   {
     id: 6,
-    title: "AI and Machine Learning",
-    description: "Dive into artificial intelligence and machine learning concepts and applications.",
-    category: "advanced",
-    duration: "14 weeks",
-    students: 412,
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1589254065878-42c9da997008?auto=format&fit=crop&w=800&q=80"
-  },
+    title: "Cloud Computing with AWS",
+    description: "Master AWS services and deploy scalable cloud applications",
+    duration: "8 weeks",
+    level: "Intermediate to Advanced",
+    image: "https://images.unsplash.com/photo-1560732488-7b5f5a03e6b3?auto=format&fit=crop&w=600&q=80",
+    price: "21,999 ETB",
+    rating: 4.8,
+    students: 542
+  }
 ];
 
-const CourseCard = ({ course }: { course: typeof courses[0] }) => (
-  <Card className="overflow-hidden bg-black/40 border border-white/10 backdrop-blur-md shadow-lg hover:shadow-purple-500/20 transition-all duration-300 transform hover:-translate-y-1">
-    <div className="h-36 sm:h-48 overflow-hidden">
-      <img src={course.image} alt={course.title} className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-110" />
-    </div>
-    <CardHeader>
-      <div className="flex flex-wrap gap-2 justify-between items-center mb-2">
-        <Badge variant="outline" className="bg-purple-900/50 text-purple-200 border-purple-400/30">
-          {course.category.charAt(0).toUpperCase() + course.category.slice(1)}
-        </Badge>
-        <div className="flex items-center gap-1 text-yellow-400">
-          <Star size={16} fill="currentColor" />
-          <span className="text-sm">{course.rating}</span>
-        </div>
-      </div>
-      <CardTitle className="text-lg sm:text-xl md:text-2xl text-gray-100">{course.title}</CardTitle>
-      <CardDescription className="text-sm sm:text-base text-gray-300">{course.description}</CardDescription>
-    </CardHeader>
-    <CardContent className="text-xs sm:text-sm text-gray-400">
-      <div className="grid grid-cols-2 gap-2 sm:gap-4">
-        <div className="flex items-center gap-2">
-          <Clock className="text-blue-400 w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          <span>{course.duration}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Users className="text-green-400 w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          <span>{course.students.toLocaleString()} students</span>
-        </div>
-      </div>
-    </CardContent>
-    <CardFooter className="border-t border-white/5 pt-4 flex flex-col sm:flex-row gap-2 sm:gap-4">
-      <Button variant="outline" className="w-full sm:w-auto border-purple-500/50 text-purple-200 hover:bg-purple-900/30">
-        Preview
-      </Button>
-      <Button className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white">
-        Enroll Now
-      </Button>
-    </CardFooter>
-  </Card>
-);
+// Animation helper function for scroll reveal
+function useScrollReveal() {
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate-fade-in');
+            entry.target.classList.add('opacity-100');
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    document.querySelectorAll('.reveal-on-scroll').forEach(el => {
+      el.classList.add('opacity-0');
+      observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+}
 
 const Courses = () => {
-  const [activeTab, setActiveTab] = useState("all");
+  useScrollReveal();
+  const [selectedCategory, setSelectedCategory] = useState("All Courses");
+  const [searchQuery, setSearchQuery] = useState("");
   
-  const filteredCourses = activeTab === "all" 
-    ? courses 
-    : courses.filter(course => course.category === activeTab);
+  const { data: courses, isLoading } = useQuery({
+    queryKey: ["courses", selectedCategory, searchQuery],
+    queryFn: async () => {
+      // You would implement real filtering logic here with supabase
+      // This is a mock implementation using the featuredCourses array
+      let filteredCourses = [...featuredCourses];
+      
+      if (selectedCategory !== "All Courses") {
+        // Mock implementation - in real app would filter from database
+      }
+      
+      if (searchQuery) {
+        filteredCourses = filteredCourses.filter(course => 
+          course.title.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }
+      
+      return filteredCourses;
+    },
+  });
 
   return (
-    <PageLayout 
-      title="Our Courses" 
-      subtitle="Unlock your potential with our interactive online courses"
-      backgroundImage="https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=1200&q=80"
+    <PageLayout
+      title="Explore Our Courses"
+      subtitle="Discover courses designed to elevate your skills and advance your career"
+      backgroundImage="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=1200&q=80"
     >
-      <div className="w-full max-w-7xl mx-auto px-4">
-        <div className="mb-8">
-          <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="bg-black/30 border border-white/10 w-full flex flex-wrap justify-center">
-              <TabsTrigger value="all" className="data-[state=active]:bg-purple-800/50 flex-1">All Courses</TabsTrigger>
-              <TabsTrigger value="beginner" className="data-[state=active]:bg-purple-800/50 flex-1">Beginner</TabsTrigger>
-              <TabsTrigger value="intermediate" className="data-[state=active]:bg-purple-800/50 flex-1">Intermediate</TabsTrigger>
-              <TabsTrigger value="advanced" className="data-[state=active]:bg-purple-800/50 flex-1">Advanced</TabsTrigger>
-            </TabsList>
-          </Tabs>
+      {/* Search and Filter Section */}
+      <div className="max-w-6xl mx-auto w-full mb-10 reveal-on-scroll">
+        <div className="flex flex-col md:flex-row gap-4 items-stretch mb-6">
+          <div className="relative flex-grow">
+            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <Input
+              type="search"
+              placeholder="Search courses..."
+              className="pl-10 bg-black/30 border-white/10 text-white"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" className="border-white/10 bg-black/30 text-white hover:bg-white/10">
+              <Filter size={16} className="mr-2" /> Filter
+            </Button>
+            <Button className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+              Popular
+            </Button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-8">
-          {filteredCourses.map(course => (
-            <CourseCard key={course.id} course={course} />
+        <ScrollArea className="w-full" orientation="horizontal">
+          <div className="flex space-x-2 pb-2">
+            {categories.map((category) => (
+              <Button
+                key={category}
+                variant={selectedCategory === category ? "default" : "outline"}
+                className={`whitespace-nowrap ${
+                  selectedCategory === category
+                    ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white"
+                    : "border-white/10 bg-black/30 text-white hover:bg-white/10"
+                }`}
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category}
+              </Button>
+            ))}
+          </div>
+        </ScrollArea>
+      </div>
+
+      {/* Featured Courses Section */}
+      <div className="max-w-6xl mx-auto w-full mb-16 reveal-on-scroll">
+        <PageHeader 
+          title="Featured Courses" 
+          subtitle="Our most popular and highly-rated learning pathways"
+        />
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {courses?.map((course) => (
+            <Card key={course.id} className="glass-morphism border-0 shadow-lg overflow-hidden hover:shadow-purple-500/20 transition-all duration-300 hover:translate-y-[-5px]">
+              <div className="h-48 overflow-hidden">
+                <img src={course.image} alt={course.title} className="w-full h-full object-cover transition-all duration-700 hover:scale-110" />
+              </div>
+              <CardHeader>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs font-medium px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full">{course.level}</span>
+                  <div className="flex items-center">
+                    <Star size={16} className="text-yellow-400 fill-yellow-400" />
+                    <span className="ml-1 text-sm text-gray-300">{course.rating}</span>
+                  </div>
+                </div>
+                <CardTitle className="text-xl text-white">{course.title}</CardTitle>
+                <CardDescription className="text-gray-300">{course.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-between text-sm text-gray-400 mb-2">
+                  <div className="flex items-center">
+                    <Clock size={14} className="mr-1" />
+                    <span>{course.duration}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Users size={14} className="mr-1" />
+                    <span>{course.students} students</span>
+                  </div>
+                </div>
+                <div className="font-semibold text-purple-300 text-right">{course.price}</div>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600">Enroll Now</Button>
+              </CardFooter>
+            </Card>
           ))}
         </div>
       </div>
+
+      {/* Learning Paths Section */}
+      <div className="max-w-6xl mx-auto w-full mb-16 reveal-on-scroll">
+        <PageHeader 
+          title="Learning Paths" 
+          subtitle="Structured programs designed to take you from beginner to professional"
+        />
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[
+            {
+              title: "Frontend Developer Path",
+              description: "Master HTML, CSS, JavaScript, and modern frontend frameworks",
+              duration: "6 months",
+              courses: 5,
+              icon: <BookOpen className="text-purple-400" size={24} />
+            },
+            {
+              title: "Data Scientist Path",
+              description: "Learn statistics, Python, machine learning, and data visualization",
+              duration: "8 months",
+              courses: 6,
+              icon: <TrendingUp className="text-blue-400" size={24} />
+            },
+            {
+              title: "UX Design Professional",
+              description: "From user research to high-fidelity prototypes and usability testing",
+              duration: "5 months",
+              courses: 4,
+              icon: <Award className="text-pink-400" size={24} />
+            },
+            {
+              title: "Digital Marketing Specialist",
+              description: "SEO, content marketing, social media, and digital advertising",
+              duration: "4 months",
+              courses: 4,
+              icon: <TrendingUp className="text-green-400" size={24} />
+            }
+          ].map((path, index) => (
+            <Card key={index} className="glass-morphism border-0 hover:shadow-purple-500/20 transition-all duration-300 hover:scale-[1.02]">
+              <CardHeader className="flex flex-row items-start space-x-4">
+                <div className="p-3 rounded-xl bg-white/5">
+                  {path.icon}
+                </div>
+                <div>
+                  <CardTitle className="text-xl text-white">{path.title}</CardTitle>
+                  <CardDescription className="text-gray-300">{path.description}</CardDescription>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-between text-sm text-gray-400">
+                  <div>Duration: {path.duration}</div>
+                  <div>{path.courses} courses</div>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button variant="outline" className="w-full border-white/10 hover:bg-white/5">
+                  View Path <ChevronRight size={16} className="ml-1" />
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Why Learn With Us Section */}
+      <div className="max-w-6xl mx-auto w-full mb-16 py-10 reveal-on-scroll">
+        <PageHeader 
+          title="Why Learn With Us" 
+          subtitle="Benefits that set our learning experience apart"
+        />
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {[
+            {
+              title: "Expert Instructors",
+              description: "Learn from industry professionals with years of real-world experience",
+              icon: <Users className="text-purple-400" size={32} />
+            },
+            {
+              title: "Practical Projects",
+              description: "Apply your knowledge with hands-on projects that build your portfolio",
+              icon: <BookOpen className="text-blue-400" size={32} />
+            },
+            {
+              title: "Flexible Learning",
+              description: "Study at your own pace with 24/7 access to course materials",
+              icon: <Clock className="text-green-400" size={32} />
+            },
+            {
+              title: "Career Support",
+              description: "Get help with resume reviews, interview preparation and job placement",
+              icon: <Award className="text-pink-400" size={32} />
+            },
+            {
+              title: "Completion Certificates",
+              description: "Earn industry-recognized certificates upon completion",
+              icon: <CheckCircle className="text-yellow-400" size={32} />
+            },
+            {
+              title: "Community Access",
+              description: "Join our community of learners for networking and collaboration",
+              icon: <Users className="text-cyan-400" size={32} />
+            }
+          ].map((feature, index) => (
+            <Card key={index} className="glass-morphism border-0 text-center p-6 hover:shadow-purple-500/20 transition-all duration-300">
+              <div className="flex justify-center mb-4">
+                <div className="p-4 rounded-full bg-white/5">
+                  {feature.icon}
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">{feature.title}</h3>
+              <p className="text-gray-300 text-sm">{feature.description}</p>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Call to Action */}
+      <CallToAction 
+        title="Ready to Upgrade Your Skills?"
+        description="Enroll in our courses today and start your journey towards mastery."
+        primaryButtonText="Browse All Courses"
+        primaryButtonLink="/courses"
+        secondaryButtonText="Learn More"
+        secondaryButtonLink="/about"
+      />
     </PageLayout>
   );
 };

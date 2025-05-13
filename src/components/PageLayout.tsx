@@ -1,7 +1,7 @@
 
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { LogIn, BookOpen, Home, GalleryHorizontal, Image as ImageIcon, Award, TrendingUp, Video, Users, Book, MapPin, Phone } from "lucide-react";
+import { LogIn, BookOpen, Home, GalleryHorizontal, Image as ImageIcon, Award, TrendingUp, Video, Users, Book, MapPin, Phone, Mail } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useEffect } from "react";
 
@@ -75,24 +75,114 @@ const PageLayout = ({ children, title, subtitle, backgroundImage }: PageLayoutPr
         </nav>
       </header>
 
-      {/* Page Content */}
-      <main className="flex-1 flex flex-col relative z-10 px-4 py-6 sm:py-10">
-        <div className="glass-morphism p-6 sm:p-8 rounded-3xl shadow-2xl max-w-7xl mx-auto w-full text-center animate-fade-in mb-8 mt-4 sm:mt-10">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-3 sm:mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent drop-shadow-glow">
-            {title}
-          </h1>
-          {subtitle && (
-            <p className="text-base sm:text-lg text-gray-200 font-medium mb-4 sm:mb-6">
-              {subtitle}
-            </p>
-          )}
-          {children}
-        </div>
-      </main>
-
-      <footer className="z-10 relative text-center text-gray-400 py-3 bg-black/60 mt-auto text-xs sm:text-sm">
-        © Ethio Digital Academy {new Date().getFullYear()}
-      </footer>
+      {/* Page Content with ScrollArea */}
+      <ScrollArea className="flex-1 relative z-10">
+        <main className="flex-1 flex flex-col relative z-10 px-4 py-6 sm:py-10">
+          <div className="glass-morphism p-6 sm:p-8 rounded-3xl shadow-2xl max-w-7xl mx-auto w-full text-center animate-fade-in mb-8 mt-4 sm:mt-10">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-3 sm:mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent drop-shadow-glow">
+              {title}
+            </h1>
+            {subtitle && (
+              <p className="text-base sm:text-lg text-gray-200 font-medium mb-4 sm:mb-6">
+                {subtitle}
+              </p>
+            )}
+            {children}
+          </div>
+        </main>
+      
+        <footer className="z-10 relative text-center text-gray-400 py-6 bg-black/60 mt-auto text-xs sm:text-sm border-t border-white/10">
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+              <div>
+                <h3 className="text-lg font-bold text-white mb-4">Ethio Digital Academy</h3>
+                <p className="text-sm text-gray-400 mb-4">
+                  Empowering Ethiopians with digital skills for a brighter future in the global tech ecosystem.
+                </p>
+                <div className="flex space-x-4">
+                  {["facebook", "twitter", "instagram", "linkedin"].map((social) => (
+                    <a 
+                      key={social} 
+                      href="#" 
+                      className="text-gray-400 hover:text-white transition-colors"
+                      aria-label={`Follow us on ${social}`}
+                    >
+                      <div className="p-2 rounded-full bg-white/5 hover:bg-white/10">
+                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                          <rect width="24" height="24" fill="none" rx="0" ry="0"/>
+                        </svg>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-4">Quick Links</h3>
+                <ul className="space-y-2">
+                  {[
+                    { label: "Home", to: "/" },
+                    { label: "About Us", to: "/about" },
+                    { label: "Courses", to: "/courses" },
+                    { label: "Library", to: "/library" },
+                    { label: "Contact", to: "/contact" }
+                  ].map((link) => (
+                    <li key={link.label}>
+                      <Link to={link.to} className="text-sm text-gray-400 hover:text-white transition-colors">
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-4">Programs</h3>
+                <ul className="space-y-2">
+                  {[
+                    "Web Development",
+                    "UI/UX Design",
+                    "Data Science",
+                    "Mobile Development",
+                    "Cloud Computing",
+                    "Digital Marketing"
+                  ].map((program) => (
+                    <li key={program}>
+                      <Link to="/courses" className="text-sm text-gray-400 hover:text-white transition-colors">
+                        {program}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-4">Contact Info</h3>
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-2 text-sm">
+                    <MapPin className="text-purple-400 mt-0.5" size={18} />
+                    <span>Addis Ababa, Ethiopia<br />Bole Road, Friendship Building</span>
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <Phone className="text-purple-400" size={18} />
+                    <a href="tel:+251911234567" className="hover:text-white">+251 911 234 567</a>
+                  </li>
+                  <li className="flex items-center gap-2 text-sm">
+                    <Mail className="text-purple-400" size={18} />
+                    <a href="mailto:info@ethiodigitalacademy.com" className="hover:text-white">info@ethiodigitalacademy.com</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="pt-4 border-t border-gray-800 text-center">
+              <p className="text-sm text-gray-500">
+                &copy; Ethio Digital Academy {new Date().getFullYear()}. All rights reserved.
+              </p>
+            </div>
+          </div>
+        </footer>
+      </ScrollArea>
     </div>
   );
 };

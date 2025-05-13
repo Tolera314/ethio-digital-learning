@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import AuthHeroImage from "@/components/auth/AuthHeroImage";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -26,8 +26,49 @@ const Auth = () => {
     name: ""
   });
   const [loading, setLoading] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Check if there's a confirmation token in the URL
+  useEffect(() => {
+    const handleConfirmation = async () => {
+      const token = searchParams.get('token');
+      const type = searchParams.get('type');
+
+      if (type === 'email_confirmation' && token) {
+        setLoading(true);
+        try {
+          // Handle email confirmation
+          const { error } = await supabase.auth.verifyOtp({
+            token_hash: token,
+            type: 'email_confirmation',
+          });
+          
+          if (error) throw error;
+          
+          toast({
+            title: "Email verified successfully!",
+            description: "You can now sign in with your email and password.",
+            variant: "success"
+          });
+          
+          setIsSignUp(false); // Switch to sign in view
+        } catch (error: any) {
+          toast({
+            title: "Verification failed",
+            description: error.message || "There was an error verifying your email",
+            variant: "destructive"
+          });
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    
+    handleConfirmation();
+  }, [searchParams, toast]);
 
   // Check if user is already signed in
   useEffect(() => {
@@ -159,18 +200,19 @@ const Auth = () => {
           data: {
             full_name: formData.name,
           },
+          emailRedirectTo: window.location.origin + "/auth",
         },
       });
       
       if (error) throw error;
+      
+      setVerificationSent(true);
       
       toast({
         title: "Account created!",
         description: "Please check your email to confirm your account",
       });
       
-      // Switch to sign in mode after successful signup
-      setIsSignUp(false);
     } catch (error: any) {
       toast({
         title: "Sign up failed",
@@ -208,293 +250,319 @@ const Auth = () => {
             "rounded-3xl border border-white/10"
           )}
         >
-          {/* Tab Toggle - Enhanced */}
-          <div className="flex justify-center mb-8 bg-black/30 rounded-full p-1.5">
-            <button
-              className={cn(
-                "w-1/2 py-2.5 text-base font-semibold rounded-full focus:outline-none transition-all flex items-center justify-center gap-2",
-                !isSignUp
-                  ? "bg-gradient-to-r from-vivid-purple to-magenta-pink text-white shadow-lg"
-                  : "bg-transparent text-gray-400 hover:text-gray-200"
-              )}
-              onClick={() => setIsSignUp(false)}
-              aria-label="Sign In"
-            >
-              <LogIn size={18} className="inline" />
-              Sign In
-            </button>
-            <button
-              className={cn(
-                "w-1/2 py-2.5 text-base font-semibold rounded-full focus:outline-none transition-all flex items-center justify-center gap-2",
-                isSignUp
-                  ? "bg-gradient-to-r from-magenta-pink to-vivid-purple text-white shadow-lg"
-                  : "bg-transparent text-gray-400 hover:text-gray-200"
-              )}
-              onClick={() => setIsSignUp(true)}
-              aria-label="Sign Up"
-            >
-              <UserPlus size={18} className="inline" />
-              Sign Up
-            </button>
-          </div>
-
-          <div className="overflow-hidden min-h-[350px]">
-            {/* Sign In Form */}
-            <form
-              className={cn(
-                "flex flex-col justify-center gap-5",
-                transitionClass,
-                !isSignUp
-                  ? "opacity-100 scale-100 pointer-events-auto translate-x-0"
-                  : "absolute opacity-0 scale-90 pointer-events-none -translate-x-36"
-              )}
-              onSubmit={handleSignIn}
-              autoComplete="off"
-            >
-              <div className="text-center mb-2">
-                <h2 className="text-xl font-bold text-white">Welcome Back!</h2>
-                <p className="text-gray-400 text-sm mt-1">Sign in to access your account</p>
-              </div>
-              
-              <label className="relative group">
-                <span className="sr-only">Email</span>
-                <Mail className="absolute left-3 top-3.5 text-vivid-purple group-focus-within:text-magenta-pink transition-colors" size={18} />
-                <Input
-                  autoFocus={!isSignUp}
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Email"
-                  className="pl-10 bg-black/30 border-white/10 text-white placeholder-gray-400 h-12 focus:border-magenta-pink"
-                  required
-                />
-              </label>
-              
-              <label className="relative group">
-                <span className="sr-only">Password</span>
-                <Lock className="absolute left-3 top-3.5 text-vivid-purple group-focus-within:text-magenta-pink transition-colors" size={18} />
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Password"
-                  className="pl-10 pr-10 bg-black/30 border-white/10 text-white placeholder-gray-400 h-12 focus:border-magenta-pink"
-                  required
-                />
-                <button
-                  type="button"
-                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-200 transition-colors"
-                  tabIndex={-1}
-                  onClick={() => setShowPassword(v => !v)}
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </label>
-              
-              <div className="flex justify-between items-center text-sm">
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="remember" 
-                    checked={formData.remember}
-                    onCheckedChange={handleCheckboxChange}
-                    className="data-[state=checked]:bg-magenta-pink data-[state=checked]:border-magenta-pink"
-                  />
-                  <Label htmlFor="remember" className="text-gray-300 text-sm">Remember me</Label>
+          {verificationSent ? (
+            <div className="text-center">
+              <div className="mb-6 flex justify-center">
+                <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center">
+                  <Mail className="text-green-400" size={32} />
                 </div>
-                <button
-                  type="button"
-                  className="text-magenta-pink hover:text-vivid-purple hover:underline transition-colors"
-                >
-                  Forgot password?
-                </button>
               </div>
-              
+              <h2 className="text-xl font-bold text-white mb-4">Verification Email Sent!</h2>
+              <p className="text-gray-300 mb-6">
+                We've sent a verification link to <span className="font-semibold text-purple-300">{formData.email}</span>. 
+                Please check your inbox and click the link to complete your registration.
+              </p>
+              <p className="text-gray-400 text-sm mb-6">
+                If you don't see the email, check your spam folder or try again in a few minutes.
+              </p>
               <Button
-                type="submit"
-                className={cn(
-                  "bg-gradient-to-r from-vivid-purple via-magenta-pink to-vivid-purple bg-size-200 hover:bg-right-bottom text-white py-2.5 px-6 mt-2 rounded-xl text-base font-semibold shadow-lg transition-all drop-shadow-glow hover:scale-[1.02]",
-                  "focus:ring focus:ring-magenta-pink/40 h-12"
-                )}
-                disabled={loading}
+                onClick={() => setVerificationSent(false)}
+                className="bg-gradient-to-r from-purple-500 to-blue-600 hover:opacity-90 transition-all"
               >
-                {loading ? (
-                  <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-2"></div>
-                ) : (
-                  <LogIn size={18} className="mr-2" />
-                )}
-                Sign In
+                Return to Login
               </Button>
-              
-              <div className="relative flex items-center justify-center mt-2 mb-2">
-                <hr className="w-full border-white/10" />
-                <span className="absolute bg-black/60 px-2 text-gray-400 text-sm">or continue with</span>
-              </div>
-              
-              <div className="flex gap-4 justify-center">
-                <Button variant="outline" className="flex-1 bg-black/20 border-white/10 hover:bg-black/40 text-white">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                  </svg>
-                  Google
-                </Button>
-                <Button variant="outline" className="flex-1 bg-black/20 border-white/10 hover:bg-black/40 text-white">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/>
-                  </svg>
-                  Facebook
-                </Button>
-              </div>
-              
-              <div className="mt-4 text-sm text-center text-gray-400">
-                New here?{" "}
+            </div>
+          ) : (
+            <>
+              {/* Tab Toggle - Enhanced */}
+              <div className="flex justify-center mb-8 bg-black/30 rounded-full p-1.5">
                 <button
-                  type="button"
-                  className="text-magenta-pink font-bold hover:underline transition-colors"
-                  onClick={() => setIsSignUp(true)}
-                >
-                  Create an account
-                </button>
-              </div>
-            </form>
-            
-            {/* Sign Up Form */}
-            <form
-              className={cn(
-                "flex flex-col justify-center gap-5 absolute top-0 left-0 w-full",
-                transitionClass,
-                isSignUp
-                  ? "opacity-100 scale-100 pointer-events-auto translate-x-0"
-                  : "opacity-0 scale-90 pointer-events-none translate-x-36"
-              )}
-              onSubmit={handleSignUp}
-              autoComplete="off"
-            >
-              <div className="text-center mb-2">
-                <h2 className="text-xl font-bold text-white">Join Us Today!</h2>
-                <p className="text-gray-400 text-sm mt-1">Create your account to get started</p>
-              </div>
-              
-              <label className="relative group">
-                <span className="sr-only">Name</span>
-                <User className="absolute left-3 top-3.5 text-vivid-purple group-focus-within:text-magenta-pink transition-colors" size={18} />
-                <Input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Full Name"
-                  className="pl-10 bg-black/30 border-white/10 text-white placeholder-gray-400 h-12 focus:border-magenta-pink"
-                  required
-                  autoFocus={isSignUp}
-                />
-              </label>
-              
-              <label className="relative group">
-                <span className="sr-only">Email</span>
-                <Mail className="absolute left-3 top-3.5 text-vivid-purple group-focus-within:text-magenta-pink transition-colors" size={18} />
-                <Input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Email"
-                  className="pl-10 bg-black/30 border-white/10 text-white placeholder-gray-400 h-12 focus:border-magenta-pink"
-                  required
-                />
-              </label>
-              
-              <label className="relative group">
-                <span className="sr-only">Password</span>
-                <Lock className="absolute left-3 top-3.5 text-vivid-purple group-focus-within:text-magenta-pink transition-colors" size={18} />
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Password"
-                  className="pl-10 pr-10 bg-black/30 border-white/10 text-white placeholder-gray-400 h-12 focus:border-magenta-pink"
-                  required
-                />
-                <button
-                  type="button"
-                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-200 transition-colors"
-                  tabIndex={-1}
-                  onClick={() => setShowPassword(v => !v)}
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </label>
-              
-              <label className="relative group">
-                <span className="sr-only">Confirm Password</span>
-                <Lock className="absolute left-3 top-3.5 text-vivid-purple group-focus-within:text-magenta-pink transition-colors" size={18} />
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  placeholder="Confirm Password"
-                  className="pl-10 pr-10 bg-black/30 border-white/10 text-white placeholder-gray-400 h-12 focus:border-magenta-pink"
-                  required
-                />
-              </label>
-              
-              <Button
-                type="submit"
-                className={cn(
-                  "bg-gradient-to-r from-magenta-pink via-vivid-purple to-magenta-pink bg-size-200 hover:bg-right-bottom text-white py-2.5 px-6 mt-2 rounded-xl text-base font-semibold shadow-lg transition-all drop-shadow-glow hover:scale-[1.02]",
-                  "focus:ring focus:ring-vivid-purple/30 h-12"
-                )}
-                disabled={loading}
-              >
-                {loading ? (
-                  <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-2"></div>
-                ) : (
-                  <UserPlus size={18} className="mr-2" />
-                )}
-                Sign Up
-              </Button>
-              
-              <div className="relative flex items-center justify-center mt-2 mb-2">
-                <hr className="w-full border-white/10" />
-                <span className="absolute bg-black/60 px-2 text-gray-400 text-sm">or sign up with</span>
-              </div>
-              
-              <div className="flex gap-4 justify-center">
-                <Button variant="outline" className="flex-1 bg-black/20 border-white/10 hover:bg-black/40 text-white">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                  </svg>
-                  Google
-                </Button>
-                <Button variant="outline" className="flex-1 bg-black/20 border-white/10 hover:bg-black/40 text-white">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/>
-                  </svg>
-                  Facebook
-                </Button>
-              </div>
-              
-              <div className="mt-4 text-sm text-center text-gray-400">
-                Already have an account?{" "}
-                <button
-                  type="button"
-                  className="text-magenta-pink font-bold hover:underline transition-colors"
+                  className={cn(
+                    "w-1/2 py-2.5 text-base font-semibold rounded-full focus:outline-none transition-all flex items-center justify-center gap-2",
+                    !isSignUp
+                      ? "bg-gradient-to-r from-vivid-purple to-magenta-pink text-white shadow-lg"
+                      : "bg-transparent text-gray-400 hover:text-gray-200"
+                  )}
                   onClick={() => setIsSignUp(false)}
+                  aria-label="Sign In"
                 >
+                  <LogIn size={18} className="inline" />
                   Sign In
                 </button>
+                <button
+                  className={cn(
+                    "w-1/2 py-2.5 text-base font-semibold rounded-full focus:outline-none transition-all flex items-center justify-center gap-2",
+                    isSignUp
+                      ? "bg-gradient-to-r from-magenta-pink to-vivid-purple text-white shadow-lg"
+                      : "bg-transparent text-gray-400 hover:text-gray-200"
+                  )}
+                  onClick={() => setIsSignUp(true)}
+                  aria-label="Sign Up"
+                >
+                  <UserPlus size={18} className="inline" />
+                  Sign Up
+                </button>
               </div>
-            </form>
-          </div>
+
+              <div className="overflow-hidden min-h-[350px]">
+                {/* Sign In Form */}
+                <form
+                  className={cn(
+                    "flex flex-col justify-center gap-5",
+                    transitionClass,
+                    !isSignUp
+                      ? "opacity-100 scale-100 pointer-events-auto translate-x-0"
+                      : "absolute opacity-0 scale-90 pointer-events-none -translate-x-36"
+                  )}
+                  onSubmit={handleSignIn}
+                  autoComplete="off"
+                >
+                  <div className="text-center mb-2">
+                    <h2 className="text-xl font-bold text-white">Welcome Back!</h2>
+                    <p className="text-gray-400 text-sm mt-1">Sign in to access your account</p>
+                  </div>
+                  
+                  <label className="relative group">
+                    <span className="sr-only">Email</span>
+                    <Mail className="absolute left-3 top-3.5 text-vivid-purple group-focus-within:text-magenta-pink transition-colors" size={18} />
+                    <Input
+                      autoFocus={!isSignUp}
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Email"
+                      className="pl-10 bg-black/30 border-white/10 text-white placeholder-gray-400 h-12 focus:border-magenta-pink"
+                      required
+                    />
+                  </label>
+                  
+                  <label className="relative group">
+                    <span className="sr-only">Password</span>
+                    <Lock className="absolute left-3 top-3.5 text-vivid-purple group-focus-within:text-magenta-pink transition-colors" size={18} />
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Password"
+                      className="pl-10 pr-10 bg-black/30 border-white/10 text-white placeholder-gray-400 h-12 focus:border-magenta-pink"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-3 text-gray-400 hover:text-gray-200 transition-colors"
+                      tabIndex={-1}
+                      onClick={() => setShowPassword(v => !v)}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </label>
+                  
+                  <div className="flex justify-between items-center text-sm">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="remember" 
+                        checked={formData.remember}
+                        onCheckedChange={handleCheckboxChange}
+                        className="data-[state=checked]:bg-magenta-pink data-[state=checked]:border-magenta-pink"
+                      />
+                      <Label htmlFor="remember" className="text-gray-300 text-sm">Remember me</Label>
+                    </div>
+                    <button
+                      type="button"
+                      className="text-magenta-pink hover:text-vivid-purple hover:underline transition-colors"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                  
+                  <Button
+                    type="submit"
+                    className={cn(
+                      "bg-gradient-to-r from-vivid-purple via-magenta-pink to-vivid-purple bg-size-200 hover:bg-right-bottom text-white py-2.5 px-6 mt-2 rounded-xl text-base font-semibold shadow-lg transition-all drop-shadow-glow hover:scale-[1.02]",
+                      "focus:ring focus:ring-magenta-pink/40 h-12"
+                    )}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                    ) : (
+                      <LogIn size={18} className="mr-2" />
+                    )}
+                    Sign In
+                  </Button>
+                  
+                  <div className="relative flex items-center justify-center mt-2 mb-2">
+                    <hr className="w-full border-white/10" />
+                    <span className="absolute bg-black/60 px-2 text-gray-400 text-sm">or continue with</span>
+                  </div>
+                  
+                  <div className="flex gap-4 justify-center">
+                    <Button variant="outline" className="flex-1 bg-black/20 border-white/10 hover:bg-black/40 text-white">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                      </svg>
+                      Google
+                    </Button>
+                    <Button variant="outline" className="flex-1 bg-black/20 border-white/10 hover:bg-black/40 text-white">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/>
+                      </svg>
+                      Facebook
+                    </Button>
+                  </div>
+                  
+                  <div className="mt-4 text-sm text-center text-gray-400">
+                    New here?{" "}
+                    <button
+                      type="button"
+                      className="text-magenta-pink font-bold hover:underline transition-colors"
+                      onClick={() => setIsSignUp(true)}
+                    >
+                      Create an account
+                    </button>
+                  </div>
+                </form>
+                
+                {/* Sign Up Form */}
+                <form
+                  className={cn(
+                    "flex flex-col justify-center gap-5 absolute top-0 left-0 w-full",
+                    transitionClass,
+                    isSignUp
+                      ? "opacity-100 scale-100 pointer-events-auto translate-x-0"
+                      : "opacity-0 scale-90 pointer-events-none translate-x-36"
+                  )}
+                  onSubmit={handleSignUp}
+                  autoComplete="off"
+                >
+                  <div className="text-center mb-2">
+                    <h2 className="text-xl font-bold text-white">Join Us Today!</h2>
+                    <p className="text-gray-400 text-sm mt-1">Create your account to get started</p>
+                  </div>
+                  
+                  <label className="relative group">
+                    <span className="sr-only">Name</span>
+                    <User className="absolute left-3 top-3.5 text-vivid-purple group-focus-within:text-magenta-pink transition-colors" size={18} />
+                    <Input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="Full Name"
+                      className="pl-10 bg-black/30 border-white/10 text-white placeholder-gray-400 h-12 focus:border-magenta-pink"
+                      required
+                      autoFocus={isSignUp}
+                    />
+                  </label>
+                  
+                  <label className="relative group">
+                    <span className="sr-only">Email</span>
+                    <Mail className="absolute left-3 top-3.5 text-vivid-purple group-focus-within:text-magenta-pink transition-colors" size={18} />
+                    <Input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Email"
+                      className="pl-10 bg-black/30 border-white/10 text-white placeholder-gray-400 h-12 focus:border-magenta-pink"
+                      required
+                    />
+                  </label>
+                  
+                  <label className="relative group">
+                    <span className="sr-only">Password</span>
+                    <Lock className="absolute left-3 top-3.5 text-vivid-purple group-focus-within:text-magenta-pink transition-colors" size={18} />
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Password"
+                      className="pl-10 pr-10 bg-black/30 border-white/10 text-white placeholder-gray-400 h-12 focus:border-magenta-pink"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-3 text-gray-400 hover:text-gray-200 transition-colors"
+                      tabIndex={-1}
+                      onClick={() => setShowPassword(v => !v)}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </label>
+                  
+                  <label className="relative group">
+                    <span className="sr-only">Confirm Password</span>
+                    <Lock className="absolute left-3 top-3.5 text-vivid-purple group-focus-within:text-magenta-pink transition-colors" size={18} />
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      placeholder="Confirm Password"
+                      className="pl-10 pr-10 bg-black/30 border-white/10 text-white placeholder-gray-400 h-12 focus:border-magenta-pink"
+                      required
+                    />
+                  </label>
+                  
+                  <Button
+                    type="submit"
+                    className={cn(
+                      "bg-gradient-to-r from-magenta-pink via-vivid-purple to-magenta-pink bg-size-200 hover:bg-right-bottom text-white py-2.5 px-6 mt-2 rounded-xl text-base font-semibold shadow-lg transition-all drop-shadow-glow hover:scale-[1.02]",
+                      "focus:ring focus:ring-vivid-purple/30 h-12"
+                    )}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                    ) : (
+                      <UserPlus size={18} className="mr-2" />
+                    )}
+                    Sign Up
+                  </Button>
+                  
+                  <div className="relative flex items-center justify-center mt-2 mb-2">
+                    <hr className="w-full border-white/10" />
+                    <span className="absolute bg-black/60 px-2 text-gray-400 text-sm">or sign up with</span>
+                  </div>
+                  
+                  <div className="flex gap-4 justify-center">
+                    <Button variant="outline" className="flex-1 bg-black/20 border-white/10 hover:bg-black/40 text-white">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                      </svg>
+                      Google
+                    </Button>
+                    <Button variant="outline" className="flex-1 bg-black/20 border-white/10 hover:bg-black/40 text-white">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2"/>
+                      </svg>
+                      Facebook
+                    </Button>
+                  </div>
+                  
+                  <div className="mt-4 text-sm text-center text-gray-400">
+                    Already have an account?{" "}
+                    <button
+                      type="button"
+                      className="text-magenta-pink font-bold hover:underline transition-colors"
+                      onClick={() => setIsSignUp(false)}
+                    >
+                      Sign In
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </>
+          )}
           
           {/* Inspirational Quote */}
           <div className="mt-10 text-center text-md italic font-semibold text-white/90 animate-fade-in delay-150">

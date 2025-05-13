@@ -1,1 +1,6 @@
+
 project_id = "hfgfazacqkykslxqtsom"
+
+[auth]
+site_url = "https://dcdd6200-7368-41ed-a2bb-348f1c4fccff.lovableproject.com"
+additional_redirect_urls = ["https://dcdd6200-7368-41ed-a2bb-348f1c4fccff.lovableproject.com/auth"]

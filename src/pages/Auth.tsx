@@ -1,14 +1,16 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Mail, Lock, Eye, EyeOff, UserPlus, LogIn, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AuthHeroImage from "@/components/auth/AuthHeroImage";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 const bgImage = 
   "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80";
@@ -23,6 +25,32 @@ const Auth = () => {
     remember: false,
     name: ""
   });
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  // Check if user is already signed in
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        navigate('/');
+      }
+    };
+    
+    checkSession();
+    
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        navigate('/');
+      }
+    });
+    
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -33,10 +61,125 @@ const Auth = () => {
     setFormData(prev => ({ ...prev, remember: checked }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateForm = () => {
+    if (!formData.email) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address",
+        variant: "destructive"
+      });
+      return false;
+    }
+    
+    if (!formData.password) {
+      toast({
+        title: "Password required",
+        description: "Please enter your password",
+        variant: "destructive"
+      });
+      return false;
+    }
+    
+    if (isSignUp) {
+      if (formData.password.length < 6) {
+        toast({
+          title: "Password too short",
+          description: "Password must be at least 6 characters",
+          variant: "destructive"
+        });
+        return false;
+      }
+      
+      if (!formData.name) {
+        toast({
+          title: "Name required",
+          description: "Please enter your full name",
+          variant: "destructive"
+        });
+        return false;
+      }
+      
+      if (formData.password !== formData.confirmPassword) {
+        toast({
+          title: "Passwords don't match",
+          description: "Please ensure both passwords match",
+          variant: "destructive"
+        });
+        return false;
+      }
+    }
+    
+    return true;
+  };
+
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Form submission logic would go here
-    console.log("Form submitted:", formData);
+    
+    if (!validateForm()) return;
+    
+    setLoading(true);
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Welcome back!",
+        description: "You have successfully signed in",
+      });
+      
+      // Navigation will be handled by the auth state change listener
+    } catch (error: any) {
+      toast({
+        title: "Sign in failed",
+        description: error.message || "There was an error signing in",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+    
+    setLoading(true);
+    
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.name,
+          },
+        },
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Account created!",
+        description: "Please check your email to confirm your account",
+      });
+      
+      // Switch to sign in mode after successful signup
+      setIsSignUp(false);
+    } catch (error: any) {
+      toast({
+        title: "Sign up failed",
+        description: error.message || "There was an error creating your account",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const transitionClass = "transition-all duration-500 ease-in-out";
@@ -105,7 +248,7 @@ const Auth = () => {
                   ? "opacity-100 scale-100 pointer-events-auto translate-x-0"
                   : "absolute opacity-0 scale-90 pointer-events-none -translate-x-36"
               )}
-              onSubmit={handleSubmit}
+              onSubmit={handleSignIn}
               autoComplete="off"
             >
               <div className="text-center mb-2">
@@ -174,8 +317,13 @@ const Auth = () => {
                   "bg-gradient-to-r from-vivid-purple via-magenta-pink to-vivid-purple bg-size-200 hover:bg-right-bottom text-white py-2.5 px-6 mt-2 rounded-xl text-base font-semibold shadow-lg transition-all drop-shadow-glow hover:scale-[1.02]",
                   "focus:ring focus:ring-magenta-pink/40 h-12"
                 )}
+                disabled={loading}
               >
-                <LogIn size={18} className="mr-2" />
+                {loading ? (
+                  <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                ) : (
+                  <LogIn size={18} className="mr-2" />
+                )}
                 Sign In
               </Button>
               
@@ -223,7 +371,7 @@ const Auth = () => {
                   ? "opacity-100 scale-100 pointer-events-auto translate-x-0"
                   : "opacity-0 scale-90 pointer-events-none translate-x-36"
               )}
-              onSubmit={handleSubmit}
+              onSubmit={handleSignUp}
               autoComplete="off"
             >
               <div className="text-center mb-2">
@@ -302,8 +450,13 @@ const Auth = () => {
                   "bg-gradient-to-r from-magenta-pink via-vivid-purple to-magenta-pink bg-size-200 hover:bg-right-bottom text-white py-2.5 px-6 mt-2 rounded-xl text-base font-semibold shadow-lg transition-all drop-shadow-glow hover:scale-[1.02]",
                   "focus:ring focus:ring-vivid-purple/30 h-12"
                 )}
+                disabled={loading}
               >
-                <UserPlus size={18} className="mr-2" />
+                {loading ? (
+                  <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                ) : (
+                  <UserPlus size={18} className="mr-2" />
+                )}
                 Sign Up
               </Button>
               

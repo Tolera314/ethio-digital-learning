@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface JoinSessionModalProps {
   open: boolean;
@@ -30,6 +31,29 @@ const JoinSessionModal = ({
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  // Get user data from Supabase session when modal opens
+  useEffect(() => {
+    async function getUserData() {
+      try {
+        const { data: { session: authSession } } = await supabase.auth.getSession();
+        if (authSession?.user) {
+          setEmail(authSession.user.email || "");
+          // Use email as username if no metadata exists
+          const displayName = authSession.user.user_metadata?.name || 
+                             authSession.user.user_metadata?.full_name || 
+                             authSession.user.email?.split('@')[0] || "";
+          setUsername(displayName);
+        }
+      } catch (error) {
+        console.error("Error getting user data:", error);
+      }
+    }
+
+    if (open) {
+      getUserData();
+    }
+  }, [open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,10 +79,7 @@ const JoinSessionModal = ({
     setIsLoading(true);
 
     try {
-      // In a real implementation, we would:
-      // 1. Verify the user's identity
-      // 2. Add them to the session participants
-      
+      // Join the session with the user's data from session
       onJoin(username, email);
       onClose();
     } catch (error) {
@@ -109,7 +130,13 @@ const JoinSessionModal = ({
                 className="col-span-3 bg-black/60 border-white/20"
                 placeholder="your.email@example.com"
                 required
+                readOnly={!!email}
               />
+              {email && (
+                <p className="text-xs text-gray-400 col-span-3 col-start-2">
+                  Using email from your account
+                </p>
+              )}
             </div>
           </div>
           <DialogFooter>

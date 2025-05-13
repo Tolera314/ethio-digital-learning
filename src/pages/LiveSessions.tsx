@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +9,7 @@ import CreateSessionModal from "@/components/CreateSessionModal";
 import JoinSessionModal from "@/components/JoinSessionModal";
 import VideoCall from "@/components/VideoCall";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const initialUpcomingSessions = [
   {
@@ -153,7 +153,29 @@ const LiveSessions = () => {
   const [currentUsername, setCurrentUsername] = useState<string>("");
   const [currentEmail, setCurrentEmail] = useState<string>("");
   const [upcomingSessions, setUpcomingSessions] = useState(initialUpcomingSessions);
+  const [userData, setUserData] = useState<{ username: string, email: string } | null>(null);
   const { toast } = useToast();
+
+  // Get user data from session on page load
+  useEffect(() => {
+    async function getUserData() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const email = session.user.email || "";
+          const username = session.user.user_metadata?.name || 
+                          session.user.user_metadata?.full_name || 
+                          session.user.email?.split('@')[0] || "";
+          
+          setUserData({ username, email });
+        }
+      } catch (error) {
+        console.error("Error getting user data:", error);
+      }
+    }
+
+    getUserData();
+  }, []);
 
   const handleCreateSession = (newSession: any) => {
     setUpcomingSessions([newSession, ...upcomingSessions]);
@@ -165,7 +187,14 @@ const LiveSessions = () => {
 
   const handleJoinSession = (session: any) => {
     setSelectedSession(session);
-    setIsJoinModalOpen(true);
+    
+    // If we already have user data, join directly
+    if (userData && userData.email && userData.username) {
+      handleStartVideoCall(userData.username, userData.email);
+    } else {
+      // Fall back to modal if no user data available
+      setIsJoinModalOpen(true);
+    }
   };
 
   const handleStartVideoCall = (username: string, email: string) => {
@@ -217,7 +246,18 @@ const LiveSessions = () => {
         <div className="flex justify-end mb-6">
           <Button
             className="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white"
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={() => {
+              if (userData) {
+                // If we have user data, open create modal
+                setIsCreateModalOpen(true);
+              } else {
+                toast({
+                  title: "Authentication Required",
+                  description: "Please sign in to host a session",
+                  variant: "destructive"
+                });
+              }
+            }}
           >
             <Plus className="mr-2 h-4 w-4" /> Host New Session
           </Button>

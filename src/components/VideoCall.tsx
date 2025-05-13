@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,11 +26,13 @@ type Participant = {
 };
 
 const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProps) => {
+  // Set both audio and video to true by default for better user experience
   const [isAudioOn, setIsAudioOn] = useState(true);
   const [isVideoOn, setIsVideoOn] = useState(true);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [participants, setParticipants] = useState<Participant[]>([]);
-  const [hasStartedSession, setHasStartedSession] = useState(isHost ? false : true);
+  // For hosts, automatically start the session
+  const [hasStartedSession, setHasStartedSession] = useState(true);
   const [chatPanelOpen, setChatPanelOpen] = useState(false);
   const [messages, setMessages] = useState<{sender: string, text: string, timestamp: string}[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -73,13 +74,18 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
         });
       } catch (err) {
         console.error("Error getting devices:", err);
+        toast({
+          title: "Device Access Error",
+          description: "Please allow access to your camera and microphone to join the session",
+          variant: "destructive"
+        });
       }
     }
     
     getAvailableDevices();
-  }, []);
+  }, [toast]);
 
-  // Initialize WebRTC and media streams
+  // Initialize WebRTC and media streams - automatically start when component mounts
   useEffect(() => {
     if (hasStartedSession) {
       initializeMediaStreams();
@@ -163,7 +169,7 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
         supabase.removeChannel(channel);
       };
     }
-  }, [sessionId, username, email, hasStartedSession, isHost]);
+  }, [sessionId, username, email, hasStartedSession, isHost, isVideoOn, isAudioOn]);
 
   // Handle audio/video status changes
   useEffect(() => {
@@ -196,7 +202,7 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
   const initializeMediaStreams = async () => {
     try {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        // Request user media
+        // Request user media with camera and mic on by default
         const stream = await navigator.mediaDevices.getUserMedia({ 
           video: true, 
           audio: {
@@ -211,7 +217,7 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
         if (localVideoRef.current) {
           localVideoRef.current.srcObject = stream;
           
-          // Set initial track states
+          // Set initial track states - default to ON
           stream.getVideoTracks().forEach(track => {
             track.enabled = isVideoOn;
           });
@@ -222,8 +228,8 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
         }
         
         toast({
-          title: "Camera and microphone access granted",
-          description: "You can now be seen and heard in the session",
+          title: "You're live!",
+          description: "Your camera and microphone are active",
         });
       }
     } catch (err) {
@@ -364,6 +370,7 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
   const startSession = async () => {
     if (!isHost) return;
     
+    // Session starts automatically now
     setHasStartedSession(true);
     toast({
       title: "Session Started",
@@ -452,7 +459,7 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
     }
   };
   
-  // Host pre-session screen
+  // Host pre-session screen - automatically starts now
   if (isHost && !hasStartedSession) {
     return (
       <div className="flex flex-col h-full items-center justify-center p-8">

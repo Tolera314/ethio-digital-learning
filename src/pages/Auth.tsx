@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Mail, Lock, Eye, EyeOff, UserPlus, LogIn, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -37,13 +36,13 @@ const Auth = () => {
       const token = searchParams.get('token');
       const type = searchParams.get('type');
 
-      if (type === 'email_confirmation' && token) {
+      if (type === 'email' && token) {
         setLoading(true);
         try {
-          // Handle email confirmation
+          // Handle email confirmation - fixed type parameter
           const { error } = await supabase.auth.verifyOtp({
             token_hash: token,
-            type: 'email_confirmation',
+            type: 'email', // Changed from 'email_confirmation' to 'email'
           });
           
           if (error) throw error;
@@ -51,7 +50,7 @@ const Auth = () => {
           toast({
             title: "Email verified successfully!",
             description: "You can now sign in with your email and password.",
-            variant: "success"
+            variant: "default" // Changed from 'success' to 'default'
           });
           
           setIsSignUp(false); // Switch to sign in view
@@ -171,6 +170,7 @@ const Auth = () => {
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in",
+        variant: "default" // Ensure we're using a valid variant
       });
       
       // Navigation will be handled by the auth state change listener
@@ -211,6 +211,7 @@ const Auth = () => {
       toast({
         title: "Account created!",
         description: "Please check your email to confirm your account",
+        variant: "default" // Changed from 'success' to 'default'
       });
       
     } catch (error: any) {

@@ -36,8 +36,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             description: "You have been signed out successfully",
             variant: "default",
           });
+        } else if (event === 'USER_UPDATED') {
+          // Handle user profile updates
+          setUser(currentSession?.user ?? null);
         }
 
+        // Update session and user state
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         setIsLoading(false);

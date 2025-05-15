@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Mail, Lock, Eye, EyeOff, UserPlus, LogIn, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -50,7 +51,7 @@ const Auth = () => {
           toast({
             title: "Email verified successfully!",
             description: "You can now sign in with your email and password.",
-            variant: "default" // Changed from 'success' to 'default'
+            variant: "default"
           });
           
           setIsSignUp(false); // Switch to sign in view
@@ -170,7 +171,7 @@ const Auth = () => {
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in",
-        variant: "default" // Ensure we're using a valid variant
+        variant: "default"
       });
       
       // Navigation will be handled by the auth state change listener
@@ -193,6 +194,9 @@ const Auth = () => {
     setLoading(true);
     
     try {
+      // Explicitly set the redirect URL to the current origin plus /auth path
+      const redirectUrl = window.location.origin + "/auth";
+      
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -200,26 +204,48 @@ const Auth = () => {
           data: {
             full_name: formData.name,
           },
-          emailRedirectTo: window.location.origin + "/auth",
+          emailRedirectTo: redirectUrl,
         },
       });
       
       if (error) throw error;
+      
+      if (data.user?.identities?.length === 0) {
+        // User already exists
+        toast({
+          title: "Account already exists",
+          description: "Please sign in instead",
+          variant: "destructive"
+        });
+        setIsSignUp(false); // Switch to sign in view
+        setLoading(false);
+        return;
+      }
       
       setVerificationSent(true);
       
       toast({
         title: "Account created!",
         description: "Please check your email to confirm your account",
-        variant: "default" // Changed from 'success' to 'default'
+        variant: "default"
       });
       
     } catch (error: any) {
-      toast({
-        title: "Sign up failed",
-        description: error.message || "There was an error creating your account",
-        variant: "destructive"
-      });
+      // Check if the error is because the user already exists
+      if (error.message?.includes('already registered')) {
+        toast({
+          title: "Account already exists",
+          description: "Please sign in instead",
+          variant: "destructive"
+        });
+        setIsSignUp(false); // Switch to sign in view
+      } else {
+        toast({
+          title: "Sign up failed",
+          description: error.message || "There was an error creating your account",
+          variant: "destructive"
+        });
+      }
     } finally {
       setLoading(false);
     }

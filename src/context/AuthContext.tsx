@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/components/ui/use-toast";
+import { logActivity } from '@/utils/activityLogger';
 
 type AuthContextType = {
   session: Session | null;
@@ -30,6 +31,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             description: `Welcome back${currentSession?.user?.user_metadata?.full_name ? ', ' + currentSession.user.user_metadata.full_name : ''}!`,
             variant: "default",
           });
+          
+          // Log sign in activity
+          setTimeout(() => {
+            logActivity('login');
+          }, 0);
         } else if (event === 'SIGNED_OUT') {
           toast({
             title: "Signed out",
@@ -53,6 +59,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       setIsLoading(false);
+      
+      // Log activity if user is already logged in
+      if (currentSession?.user) {
+        setTimeout(() => {
+          logActivity('login');
+        }, 0);
+      }
     });
 
     return () => subscription.unsubscribe();

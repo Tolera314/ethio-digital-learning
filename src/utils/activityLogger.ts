@@ -13,7 +13,7 @@ export type ActivityType =
   | 'session_join'
   | 'login';
 
-// Define ActivityMetadata with simple types only, avoiding nested objects
+// Define ActivityMetadata with simple types only
 export interface ActivityMetadata {
   title?: string;
   progress?: number;
@@ -87,7 +87,7 @@ export const getUserActivitySummary = async () => {
     // Calculate total learning time in minutes
     const totalMinutes = timeData?.reduce((total, activity) => {
       // Safely access the duration property using a type guard
-      const metadata = activity.metadata as Json;
+      const metadata = activity.metadata;
       const duration = typeof metadata === 'object' && metadata !== null ? 
         Number((metadata as Record<string, unknown>).duration || 0) : 0;
       return total + duration;

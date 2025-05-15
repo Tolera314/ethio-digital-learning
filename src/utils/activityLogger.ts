@@ -13,13 +13,15 @@ export type ActivityType =
   | 'session_join'
   | 'login';
 
+// Fix: Modified the ActivityMetadata interface to avoid recursive type references
 export interface ActivityMetadata {
   title?: string;
   progress?: number;
   duration?: number;
   category?: string;
   completed?: boolean;
-  [key: string]: any;
+  // Instead of allowing any key with any value, we'll restrict to primitive types
+  [key: string]: string | number | boolean | null | undefined;
 }
 
 /**
@@ -84,8 +86,11 @@ export const getUserActivitySummary = async () => {
     
     // Calculate total learning time in minutes
     const totalMinutes = timeData?.reduce((total, activity) => {
-      const metadata = activity.metadata as unknown as ActivityMetadata;
-      return total + (metadata?.duration || 0);
+      // Safely access the duration property
+      const metadata = activity.metadata as Json;
+      const duration = typeof metadata === 'object' && metadata !== null ? 
+        (metadata as any).duration || 0 : 0;
+      return total + duration;
     }, 0) || 0;
     
     // Get total courses in progress
@@ -106,7 +111,7 @@ export const getUserActivitySummary = async () => {
       .select('resource_id')
       .eq('activity_type', 'course_progress')
       .eq('user_id', session.user.id)
-      .eq('metadata->completed', 'true');
+      .eq('metadata->completed', true);
     
     if (completedError) throw completedError;
     

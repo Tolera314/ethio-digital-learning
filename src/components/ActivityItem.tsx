@@ -22,8 +22,8 @@ const getActivityIcon = (activityType: string) => {
 };
 
 const getActivityTitle = (activity: UserActivity) => {
-  // Safely cast metadata to ActivityMetadata
-  const metadata = activity.metadata as unknown as ActivityMetadata;
+  // Safely extract metadata properties
+  const metadata = activity.metadata as any;
   
   switch (activity.activity_type) {
     case 'course_view':
@@ -44,8 +44,8 @@ const getActivityTitle = (activity: UserActivity) => {
 };
 
 const getActivityDescription = (activity: UserActivity) => {
-  // Safely cast metadata to ActivityMetadata
-  const metadata = activity.metadata as unknown as ActivityMetadata;
+  // Safely extract metadata properties
+  const metadata = activity.metadata as any;
   
   switch (activity.activity_type) {
     case 'course_progress':

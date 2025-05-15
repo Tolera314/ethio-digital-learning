@@ -74,8 +74,8 @@ export const useUserActivities = () => {
             )[0];
             
           if (latestActivity) {
-            // Safely cast the JSON metadata to our expected type
-            const metadata = latestActivity.metadata as unknown as ActivityMetadata;
+            // Safely extract metadata properties
+            const metadata = latestActivity.metadata as any;
             coursesProgress.push({
               courseId,
               title: metadata?.title || 'Untitled Course',

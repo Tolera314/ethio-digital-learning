@@ -2,7 +2,6 @@
 import { formatDistanceToNow } from 'date-fns';
 import { Award, BookOpen, Clock, Video, TrendingUp } from 'lucide-react';
 import { UserActivity } from '@/hooks/useUserActivities';
-import { ActivityMetadata } from '@/utils/activityLogger';
 import { Json } from '@/integrations/supabase/types';
 
 const getActivityIcon = (activityType: string) => {
@@ -22,20 +21,22 @@ const getActivityIcon = (activityType: string) => {
 };
 
 const getActivityTitle = (activity: UserActivity) => {
-  // Safely extract metadata properties
-  const metadata = activity.metadata as any;
+  // Safely extract metadata properties with type checking
+  const metadata = activity.metadata;
+  const title = typeof metadata === 'object' && metadata !== null ? 
+    String((metadata as Record<string, unknown>).title || '') : '';
   
   switch (activity.activity_type) {
     case 'course_view':
-      return `Viewed ${metadata?.title || 'a course'}`;
+      return `Viewed ${title || 'a course'}`;
     case 'course_progress':
-      return `Made progress in ${metadata?.title || 'a course'}`;
+      return `Made progress in ${title || 'a course'}`;
     case 'lesson_complete':
-      return `Completed ${metadata?.title || 'a lesson'}`;
+      return `Completed ${title || 'a lesson'}`;
     case 'certificate_earned':
-      return `Earned ${metadata?.title || 'a certificate'}`;
+      return `Earned ${title || 'a certificate'}`;
     case 'session_join':
-      return `Joined ${metadata?.title || 'a live session'}`;
+      return `Joined ${title || 'a live session'}`;
     case 'login':
       return 'Logged in';
     default:
@@ -44,20 +45,28 @@ const getActivityTitle = (activity: UserActivity) => {
 };
 
 const getActivityDescription = (activity: UserActivity) => {
-  // Safely extract metadata properties
-  const metadata = activity.metadata as any;
+  // Safely extract metadata properties with type checking
+  const metadata = activity.metadata;
+  
+  if (typeof metadata !== 'object' || metadata === null) {
+    return '';
+  }
+  
+  const metadataObj = metadata as Record<string, unknown>;
   
   switch (activity.activity_type) {
     case 'course_progress':
-      return metadata?.progress !== undefined 
-        ? `${Math.round(metadata.progress)}% complete` 
+      return metadataObj.progress !== undefined 
+        ? `${Math.round(Number(metadataObj.progress))}% complete` 
         : '';
     case 'lesson_complete':
-      return metadata?.duration !== undefined 
-        ? `${metadata.duration} minutes` 
+      return metadataObj.duration !== undefined 
+        ? `${metadataObj.duration} minutes` 
         : '';
     case 'certificate_earned':
-      return `In ${metadata?.category || 'technology'}`;
+      return metadataObj.category !== undefined
+        ? `In ${String(metadataObj.category || 'technology')}`
+        : '';
     default:
       return '';
   }

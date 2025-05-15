@@ -13,14 +13,14 @@ export type ActivityType =
   | 'session_join'
   | 'login';
 
-// Fix: Modified the ActivityMetadata interface to avoid recursive type references
+// Define ActivityMetadata with simple types only, avoiding nested objects
 export interface ActivityMetadata {
   title?: string;
   progress?: number;
   duration?: number;
   category?: string;
   completed?: boolean;
-  // Instead of allowing any key with any value, we'll restrict to primitive types
+  // Only accept primitive types to avoid recursive type issues
   [key: string]: string | number | boolean | null | undefined;
 }
 
@@ -86,10 +86,10 @@ export const getUserActivitySummary = async () => {
     
     // Calculate total learning time in minutes
     const totalMinutes = timeData?.reduce((total, activity) => {
-      // Safely access the duration property
+      // Safely access the duration property using a type guard
       const metadata = activity.metadata as Json;
       const duration = typeof metadata === 'object' && metadata !== null ? 
-        (metadata as any).duration || 0 : 0;
+        Number((metadata as Record<string, unknown>).duration || 0) : 0;
       return total + duration;
     }, 0) || 0;
     

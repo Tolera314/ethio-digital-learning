@@ -1,6 +1,6 @@
 
 import { formatDistanceToNow } from 'date-fns';
-import { Award, BookOpen, Clock, Video, TrendingUp } from 'lucide-react';
+import { Award, BookOpen, Clock, Video, TrendingUp, Book, Users } from 'lucide-react';
 import { UserActivity } from '@/hooks/useUserActivities';
 import { Json } from '@/integrations/supabase/types';
 
@@ -15,6 +15,8 @@ const getActivityIcon = (activityType: string) => {
       return <Award className="text-yellow-400" size={20} />;
     case 'session_join':
       return <Video className="text-purple-400" size={20} />;
+    case 'book_view':
+      return <Book className="text-orange-400" size={20} />;
     default:
       return <TrendingUp className="text-gray-400" size={20} />;
   }
@@ -34,7 +36,11 @@ const getActivityTitle = (activity: UserActivity) => {
     case 'certificate_earned':
       return `Earned ${metadata?.title || 'a certificate'}`;
     case 'session_join':
-      return `Joined ${metadata?.title || 'a live session'}`;
+      return activity.resource_type === 'reading_session' 
+        ? `Joined reading group for ${metadata?.book_title || 'a book'}` 
+        : `Joined ${metadata?.title || 'a live session'}`;
+    case 'book_view':
+      return `Read ${metadata?.title || 'a book'}`;
     case 'login':
       return 'Logged in';
     default:
@@ -57,6 +63,8 @@ const getActivityDescription = (activity: UserActivity) => {
         : '';
     case 'certificate_earned':
       return `In ${metadata?.category || 'technology'}`;
+    case 'book_view':
+      return metadata?.author ? `By ${metadata.author}` : '';
     default:
       return '';
   }

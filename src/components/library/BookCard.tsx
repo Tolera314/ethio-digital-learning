@@ -1,11 +1,14 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Book, BookOpen, Calendar } from "lucide-react";
+import { BookOpen, Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { logActivity } from "@/utils/activityLogger";
 import type { Book as BookType } from "@/types/library";
 
 interface BookCardProps {
@@ -13,27 +16,50 @@ interface BookCardProps {
 }
 
 const BookCard = ({ book }: BookCardProps) => {
+  const navigate = useNavigate();
+  const [showCollaborative, setShowCollaborative] = useState(false);
+
   const handleReadBook = async () => {
     const { data: session } = await supabase.auth.getSession();
     if (!session?.session?.user) {
       // Redirect to auth page if not logged in
-      window.location.href = "/auth";
+      navigate("/auth");
       return;
     }
 
-    const { data, error } = await supabase
-      .from("user_books")
-      .upsert({
-        book_id: book.id,
-        user_id: session.session.user.id,
-        status: "reading",
-        last_read_at: new Date().toISOString(),
-      })
-      .select("*");
+    try {
+      const { data, error } = await supabase
+        .from("user_books")
+        .upsert({
+          book_id: book.id,
+          user_id: session.session.user.id,
+          status: "reading",
+          last_read_at: new Date().toISOString(),
+        })
+        .select("*");
 
-    if (!error) {
-      window.location.href = `/books/${book.id}`;
+      if (error) throw error;
+      
+      // Log the activity
+      await logActivity(
+        'book_view',
+        book.id,
+        'book',
+        { 
+          title: book.title,
+          author: book.author,
+          category: book.category
+        }
+      );
+
+      navigate(`/books/${book.id}`);
+    } catch (error: any) {
+      toast.error(`Failed to start reading: ${error.message}`);
     }
+  };
+
+  const handleToggleCollaborative = () => {
+    setShowCollaborative(!showCollaborative);
   };
 
   return (
@@ -64,12 +90,20 @@ const BookCard = ({ book }: BookCardProps) => {
         <p className="text-sm text-gray-300 line-clamp-3">{book.description}</p>
       </CardContent>
 
-      <CardFooter className="border-t border-white/5 pt-4">
+      <CardFooter className="border-t border-white/5 pt-4 flex flex-col gap-2">
         <Button 
           className="w-full bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600"
           onClick={handleReadBook}
         >
           <BookOpen className="mr-2 h-4 w-4" /> Read Book
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          className="w-full border-white/10 text-white hover:bg-white/5"
+          onClick={handleToggleCollaborative}
+        >
+          <Users className="mr-2 h-4 w-4" /> Reading Groups
         </Button>
       </CardFooter>
     </Card>

@@ -123,12 +123,34 @@ export const getUserActivitySummary = async () => {
     
     const totalCertificates = new Set(certData?.map(c => c.resource_id)).size;
     
+    // Get books read
+    const { data: booksData, error: booksError } = await supabase
+      .from('user_books')
+      .select('book_id')
+      .eq('user_id', session.user.id);
+      
+    if (booksError) throw booksError;
+    
+    const totalBooks = booksData?.length || 0;
+    
+    // Get reading sessions
+    const { data: sessionsData, error: sessionsError } = await supabase
+      .from('session_participants')
+      .select('session_id')
+      .eq('user_id', session.user.id);
+      
+    if (sessionsError) throw sessionsError;
+    
+    const totalReadingSessions = new Set(sessionsData?.map(s => s.session_id)).size;
+    
     return {
       totalLearningTime: totalMinutes,
       coursesInProgress,
       completedCourses,
       totalCertificates,
-      enrolledCourses: coursesInProgress + completedCourses
+      enrolledCourses: coursesInProgress + completedCourses,
+      totalBooks,
+      totalReadingSessions
     };
   } catch (error) {
     console.error('Error getting activity summary:', error);
@@ -137,7 +159,9 @@ export const getUserActivitySummary = async () => {
       coursesInProgress: 0,
       completedCourses: 0,
       totalCertificates: 0,
-      enrolledCourses: 0
+      enrolledCourses: 0,
+      totalBooks: 0,
+      totalReadingSessions: 0
     };
   }
 };

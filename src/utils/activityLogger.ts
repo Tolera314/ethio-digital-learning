@@ -41,14 +41,13 @@ export const logActivity = async (
       return;
     }
 
-    // Insert activity with properly typed metadata that's compatible with Json type
+    // Insert activity with metadata as a simple object without complex type assertions
     const { error } = await supabase.from('user_activities').insert({
       user_id: session.user.id,
       activity_type: activityType,
       resource_id: resourceId,
       resource_type: resourceType,
-      // Use the Json type directly without any casting
-      metadata: metadata as Json
+      metadata: metadata
     });
 
     if (error) {

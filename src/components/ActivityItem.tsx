@@ -2,7 +2,6 @@
 import { formatDistanceToNow } from 'date-fns';
 import { Award, BookOpen, Clock, Video, TrendingUp } from 'lucide-react';
 import { UserActivity } from '@/hooks/useUserActivities';
-import { Json } from '@/integrations/supabase/types';
 
 const getActivityIcon = (activityType: string) => {
   switch (activityType) {
@@ -23,8 +22,12 @@ const getActivityIcon = (activityType: string) => {
 const getActivityTitle = (activity: UserActivity) => {
   // Safely extract metadata properties with type checking
   const metadata = activity.metadata;
-  const title = typeof metadata === 'object' && metadata !== null ? 
-    String((metadata as Record<string, unknown>).title || '') : '';
+  let title = '';
+  
+  if (metadata && typeof metadata === 'object') {
+    const titleValue = (metadata as Record<string, unknown>).title;
+    title = typeof titleValue === 'string' ? titleValue : '';
+  }
   
   switch (activity.activity_type) {
     case 'course_view':
@@ -48,7 +51,7 @@ const getActivityDescription = (activity: UserActivity) => {
   // Safely extract metadata properties with type checking
   const metadata = activity.metadata;
   
-  if (typeof metadata !== 'object' || metadata === null) {
+  if (!metadata || typeof metadata !== 'object') {
     return '';
   }
   
@@ -56,16 +59,19 @@ const getActivityDescription = (activity: UserActivity) => {
   
   switch (activity.activity_type) {
     case 'course_progress':
-      return metadataObj.progress !== undefined 
-        ? `${Math.round(Number(metadataObj.progress))}% complete` 
+      const progress = metadataObj.progress;
+      return typeof progress === 'number' 
+        ? `${Math.round(progress)}% complete` 
         : '';
     case 'lesson_complete':
-      return metadataObj.duration !== undefined 
-        ? `${metadataObj.duration} minutes` 
+      const duration = metadataObj.duration;
+      return typeof duration === 'number' 
+        ? `${duration} minutes` 
         : '';
     case 'certificate_earned':
-      return metadataObj.category !== undefined
-        ? `In ${String(metadataObj.category || 'technology')}`
+      const category = metadataObj.category;
+      return typeof category === 'string'
+        ? `In ${category || 'technology'}`
         : '';
     default:
       return '';

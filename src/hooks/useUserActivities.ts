@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
-import { Json } from '@/integrations/supabase/types';
 
 export interface UserActivity {
   id: string;
@@ -10,7 +9,7 @@ export interface UserActivity {
   resource_id: string | null;
   resource_type: string | null;
   created_at: string;
-  metadata: Json;
+  metadata: unknown;
 }
 
 export interface CourseProgress {
@@ -75,13 +74,22 @@ export const useUserActivities = () => {
           if (latestActivity) {
             // Safely extract metadata properties with proper type checking
             const metadata = latestActivity.metadata;
-            const title = typeof metadata === 'object' && metadata !== null ? 
-              String((metadata as Record<string, unknown>).title || 'Untitled Course') : 
-              'Untitled Course';
+            let title = 'Untitled Course';
+            let progress = 0;
+            
+            if (metadata && typeof metadata === 'object') {
+              const metadataObj = metadata as Record<string, unknown>;
               
-            const progress = typeof metadata === 'object' && metadata !== null ? 
-              Number((metadata as Record<string, unknown>).progress || 0) : 
-              0;
+              const titleValue = metadataObj.title;
+              if (typeof titleValue === 'string') {
+                title = titleValue || 'Untitled Course';
+              }
+              
+              const progressValue = metadataObj.progress;
+              if (typeof progressValue === 'number') {
+                progress = progressValue;
+              }
+            }
               
             coursesProgress.push({
               courseId,

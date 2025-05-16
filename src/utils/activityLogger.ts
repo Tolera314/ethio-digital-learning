@@ -2,7 +2,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/components/ui/use-toast";
-import { Json } from "@/integrations/supabase/types";
 
 export type ActivityType = 
   | 'course_view'
@@ -46,7 +45,7 @@ export const logActivity = async (
       activity_type: activityType,
       resource_id: resourceId,
       resource_type: resourceType,
-      metadata: metadata as Json
+      metadata: metadata
     });
 
     if (error) {
@@ -88,9 +87,12 @@ export const getUserActivitySummary = async () => {
     const totalMinutes = timeData?.reduce((total, activity) => {
       // Safely access the duration property using a type guard
       const metadata = activity.metadata;
-      const duration = typeof metadata === 'object' && metadata !== null ? 
-        Number((metadata as Record<string, unknown>).duration || 0) : 0;
-      return total + duration;
+      if (!metadata || typeof metadata !== 'object') {
+        return total;
+      }
+      // Use a simple type assertion without referencing Json type
+      const duration = (metadata as Record<string, unknown>).duration;
+      return total + (typeof duration === 'number' ? duration : 0);
     }, 0) || 0;
     
     // Get total courses in progress

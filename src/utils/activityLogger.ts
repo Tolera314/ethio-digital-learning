@@ -1,6 +1,8 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/components/ui/use-toast";
+import { Json } from "@/integrations/supabase/types";
 
 export type ActivityType = 
   | 'course_view'
@@ -16,6 +18,7 @@ export interface ActivityMetadata {
   progress?: number;
   duration?: number;
   category?: string;
+  completed?: boolean;
   [key: string]: any;
 }
 
@@ -29,11 +32,19 @@ export const logActivity = async (
   metadata: ActivityMetadata = {}
 ) => {
   try {
+    // Get the current user ID from auth
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      console.error('No authenticated user found when logging activity');
+      return;
+    }
+
     const { error } = await supabase.from('user_activities').insert({
+      user_id: session.user.id,
       activity_type: activityType,
       resource_id: resourceId,
       resource_type: resourceType,
-      metadata
+      metadata: metadata as Json
     });
 
     if (error) {
@@ -49,17 +60,32 @@ export const logActivity = async (
  */
 export const getUserActivitySummary = async () => {
   try {
+    // Get current user ID
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      console.error('No authenticated user found when getting activity summary');
+      return {
+        totalLearningTime: 0,
+        coursesInProgress: 0,
+        completedCourses: 0,
+        totalCertificates: 0,
+        enrolledCourses: 0
+      };
+    }
+
     // Get total learning time
     const { data: timeData, error: timeError } = await supabase
       .from('user_activities')
       .select('metadata')
-      .eq('activity_type', 'lesson_complete');
+      .eq('activity_type', 'lesson_complete')
+      .eq('user_id', session.user.id);
     
     if (timeError) throw timeError;
     
     // Calculate total learning time in minutes
     const totalMinutes = timeData?.reduce((total, activity) => {
-      return total + (activity.metadata?.duration || 0);
+      const metadata = activity.metadata as unknown as ActivityMetadata;
+      return total + (metadata?.duration || 0);
     }, 0) || 0;
     
     // Get total courses in progress
@@ -67,7 +93,8 @@ export const getUserActivitySummary = async () => {
       .from('user_activities')
       .select('resource_id')
       .eq('activity_type', 'course_progress')
-      .is('metadata->>completed', null);
+      .eq('user_id', session.user.id)
+      .is('metadata->completed', null);
     
     if (courseError) throw courseError;
     
@@ -78,7 +105,8 @@ export const getUserActivitySummary = async () => {
       .from('user_activities')
       .select('resource_id')
       .eq('activity_type', 'course_progress')
-      .eq('metadata->>completed', true);
+      .eq('user_id', session.user.id)
+      .eq('metadata->completed', 'true');
     
     if (completedError) throw completedError;
     
@@ -88,7 +116,8 @@ export const getUserActivitySummary = async () => {
     const { data: certData, error: certError } = await supabase
       .from('user_activities')
       .select('resource_id')
-      .eq('activity_type', 'certificate_earned');
+      .eq('activity_type', 'certificate_earned')
+      .eq('user_id', session.user.id);
     
     if (certError) throw certError;
     

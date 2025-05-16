@@ -2,6 +2,8 @@
 import { formatDistanceToNow } from 'date-fns';
 import { Award, BookOpen, Clock, Video, TrendingUp } from 'lucide-react';
 import { UserActivity } from '@/hooks/useUserActivities';
+import { ActivityMetadata } from '@/utils/activityLogger';
+import { Json } from '@/integrations/supabase/types';
 
 const getActivityIcon = (activityType: string) => {
   switch (activityType) {
@@ -20,17 +22,20 @@ const getActivityIcon = (activityType: string) => {
 };
 
 const getActivityTitle = (activity: UserActivity) => {
+  // Safely cast metadata to ActivityMetadata
+  const metadata = activity.metadata as unknown as ActivityMetadata;
+  
   switch (activity.activity_type) {
     case 'course_view':
-      return `Viewed ${activity.metadata?.title || 'a course'}`;
+      return `Viewed ${metadata?.title || 'a course'}`;
     case 'course_progress':
-      return `Made progress in ${activity.metadata?.title || 'a course'}`;
+      return `Made progress in ${metadata?.title || 'a course'}`;
     case 'lesson_complete':
-      return `Completed ${activity.metadata?.title || 'a lesson'}`;
+      return `Completed ${metadata?.title || 'a lesson'}`;
     case 'certificate_earned':
-      return `Earned ${activity.metadata?.title || 'a certificate'}`;
+      return `Earned ${metadata?.title || 'a certificate'}`;
     case 'session_join':
-      return `Joined ${activity.metadata?.title || 'a live session'}`;
+      return `Joined ${metadata?.title || 'a live session'}`;
     case 'login':
       return 'Logged in';
     default:
@@ -39,17 +44,20 @@ const getActivityTitle = (activity: UserActivity) => {
 };
 
 const getActivityDescription = (activity: UserActivity) => {
+  // Safely cast metadata to ActivityMetadata
+  const metadata = activity.metadata as unknown as ActivityMetadata;
+  
   switch (activity.activity_type) {
     case 'course_progress':
-      return activity.metadata?.progress 
-        ? `${Math.round(activity.metadata.progress)}% complete` 
+      return metadata?.progress !== undefined 
+        ? `${Math.round(metadata.progress)}% complete` 
         : '';
     case 'lesson_complete':
-      return activity.metadata?.duration 
-        ? `${activity.metadata.duration} minutes` 
+      return metadata?.duration !== undefined 
+        ? `${metadata.duration} minutes` 
         : '';
     case 'certificate_earned':
-      return `In ${activity.metadata?.category || 'technology'}`;
+      return `In ${metadata?.category || 'technology'}`;
     default:
       return '';
   }

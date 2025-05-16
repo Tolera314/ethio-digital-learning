@@ -25,8 +25,8 @@ const getActivityTitle = (activity: UserActivity) => {
   let title = '';
   
   if (metadata && typeof metadata === 'object') {
-    const metadataObj = metadata as Record<string, unknown>;
-    const titleValue = metadataObj.title;
+    // Use any type for safe property access
+    const titleValue = (metadata as any).title;
     title = typeof titleValue === 'string' ? titleValue : '';
   }
   
@@ -56,7 +56,8 @@ const getActivityDescription = (activity: UserActivity) => {
     return '';
   }
   
-  const metadataObj = metadata as Record<string, unknown>;
+  // Use 'any' type for safer property access
+  const metadataObj = metadata as any;
   
   switch (activity.activity_type) {
     case 'course_progress':

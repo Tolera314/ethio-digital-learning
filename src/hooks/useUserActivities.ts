@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
+import { Json } from '@/integrations/supabase/types';
 
 export interface UserActivity {
   id: string;
@@ -9,7 +10,7 @@ export interface UserActivity {
   resource_id: string | null;
   resource_type: string | null;
   created_at: string;
-  metadata: unknown; // Using unknown to avoid recursive type issues
+  metadata: Json; // Use Json type directly from Supabase types
 }
 
 export interface CourseProgress {
@@ -78,14 +79,13 @@ export const useUserActivities = () => {
             let progress = 0;
             
             if (metadata && typeof metadata === 'object') {
-              const metadataObj = metadata as Record<string, unknown>;
-              
-              const titleValue = metadataObj.title;
+              // Simplified type access without referencing complex Json type
+              const titleValue = (metadata as any).title;
               if (typeof titleValue === 'string') {
                 title = titleValue || 'Untitled Course';
               }
               
-              const progressValue = metadataObj.progress;
+              const progressValue = (metadata as any).progress;
               if (typeof progressValue === 'number') {
                 progress = progressValue;
               }

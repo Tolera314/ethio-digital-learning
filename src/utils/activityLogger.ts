@@ -2,6 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/components/ui/use-toast";
+import { Json } from "@/integrations/supabase/types";
 
 export type ActivityType = 
   | 'course_view'
@@ -40,13 +41,14 @@ export const logActivity = async (
       return;
     }
 
-    // Insert without referencing the problematic Json type
+    // Insert activity with properly typed metadata that's compatible with Json type
     const { error } = await supabase.from('user_activities').insert({
       user_id: session.user.id,
       activity_type: activityType,
       resource_id: resourceId,
       resource_type: resourceType,
-      metadata: metadata as Record<string, unknown>
+      // Use the Json type directly without any casting
+      metadata: metadata as Json
     });
 
     if (error) {
@@ -91,8 +93,9 @@ export const getUserActivitySummary = async () => {
       if (!metadata || typeof metadata !== 'object') {
         return total;
       }
-      // Use a simple type assertion without referencing Json type
-      const duration = (metadata as Record<string, unknown>).duration;
+      
+      // Use a simple type assertion for accessing properties
+      const duration = (metadata as any).duration;
       return total + (typeof duration === 'number' ? duration : 0);
     }, 0) || 0;
     

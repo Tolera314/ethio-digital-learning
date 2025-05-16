@@ -20,14 +20,14 @@ const getActivityIcon = (activityType: string) => {
 };
 
 const getActivityTitle = (activity: UserActivity) => {
-  // Safely extract metadata properties with type checking
+  // Safely extract metadata properties
   const metadata = activity.metadata;
   let title = '';
   
   if (metadata && typeof metadata === 'object') {
-    // Use any type for safe property access
-    const titleValue = (metadata as any).title;
-    title = typeof titleValue === 'string' ? titleValue : '';
+    // Access title safely
+    const metadataObj = metadata as any;
+    title = typeof metadataObj.title === 'string' ? metadataObj.title : '';
   }
   
   switch (activity.activity_type) {
@@ -49,14 +49,14 @@ const getActivityTitle = (activity: UserActivity) => {
 };
 
 const getActivityDescription = (activity: UserActivity) => {
-  // Safely extract metadata properties with type checking
+  // Safely extract metadata properties
   const metadata = activity.metadata;
   
   if (!metadata || typeof metadata !== 'object') {
     return '';
   }
   
-  // Use 'any' type for safer property access
+  // Access metadata properties safely
   const metadataObj = metadata as any;
   
   switch (activity.activity_type) {

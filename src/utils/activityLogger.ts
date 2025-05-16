@@ -41,13 +41,14 @@ export const logActivity = async (
       return;
     }
 
-    // Insert activity with metadata as a simple object without complex type assertions
+    // Insert activity with metadata as a simple JSON object
     const { error } = await supabase.from('user_activities').insert({
       user_id: session.user.id,
       activity_type: activityType,
       resource_id: resourceId,
       resource_type: resourceType,
-      metadata: metadata
+      // Use type assertion to tell TypeScript this matches the Json type
+      metadata: metadata as any
     });
 
     if (error) {
@@ -87,13 +88,13 @@ export const getUserActivitySummary = async () => {
     
     // Calculate total learning time in minutes
     const totalMinutes = timeData?.reduce((total, activity) => {
-      // Safely access the duration property using a type guard
+      // Safely access the duration property without type complexity
       const metadata = activity.metadata;
       if (!metadata || typeof metadata !== 'object') {
         return total;
       }
       
-      // Use a simple type assertion for accessing properties
+      // Use a type assertion for simpler property access
       const duration = (metadata as any).duration;
       return total + (typeof duration === 'number' ? duration : 0);
     }, 0) || 0;

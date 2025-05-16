@@ -73,21 +73,21 @@ export const useUserActivities = () => {
             )[0];
             
           if (latestActivity) {
-            // Safely extract metadata properties with proper type checking
+            // Access metadata properties safely
             const metadata = latestActivity.metadata;
             let title = 'Untitled Course';
             let progress = 0;
             
             if (metadata && typeof metadata === 'object') {
-              // Simplified type access without referencing complex Json type
-              const titleValue = (metadata as any).title;
-              if (typeof titleValue === 'string') {
-                title = titleValue || 'Untitled Course';
+              // Safe property access
+              const metadataObj = metadata as any;
+              
+              if (typeof metadataObj.title === 'string') {
+                title = metadataObj.title || 'Untitled Course';
               }
               
-              const progressValue = (metadata as any).progress;
-              if (typeof progressValue === 'number') {
-                progress = progressValue;
+              if (typeof metadataObj.progress === 'number') {
+                progress = metadataObj.progress;
               }
             }
               

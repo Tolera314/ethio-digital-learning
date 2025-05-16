@@ -13,13 +13,13 @@ export type ActivityType =
   | 'session_join'
   | 'login';
 
+// Simplify ActivityMetadata to avoid circular references
 export interface ActivityMetadata {
   title?: string;
   progress?: number;
   duration?: number;
   category?: string;
   completed?: boolean;
-  [key: string]: any;
 }
 
 /**
@@ -29,7 +29,7 @@ export const logActivity = async (
   activityType: ActivityType,
   resourceId?: string,
   resourceType?: string,
-  metadata: ActivityMetadata = {}
+  metadata: Record<string, unknown> = {}
 ) => {
   try {
     // Get the current user ID from auth
@@ -84,7 +84,8 @@ export const getUserActivitySummary = async () => {
     
     // Calculate total learning time in minutes
     const totalMinutes = timeData?.reduce((total, activity) => {
-      const metadata = activity.metadata as unknown as ActivityMetadata;
+      // Safe access to metadata properties
+      const metadata = activity.metadata as any;
       return total + (metadata?.duration || 0);
     }, 0) || 0;
     
@@ -106,7 +107,7 @@ export const getUserActivitySummary = async () => {
       .select('resource_id')
       .eq('activity_type', 'course_progress')
       .eq('user_id', session.user.id)
-      .eq('metadata->completed', 'true');
+      .eq('metadata->completed', true);
     
     if (completedError) throw completedError;
     

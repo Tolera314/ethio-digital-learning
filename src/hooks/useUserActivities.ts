@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
-import { ActivityMetadata } from '@/utils/activityLogger';
 import { Json } from '@/integrations/supabase/types';
 
 export interface UserActivity {
@@ -42,6 +41,7 @@ export const useUserActivities = () => {
         const { data, error: activitiesError } = await supabase
           .from('user_activities')
           .select('*')
+          .eq('user_id', user.id)
           .order('created_at', { ascending: false });
 
         if (activitiesError) throw activitiesError;
@@ -74,8 +74,8 @@ export const useUserActivities = () => {
             )[0];
             
           if (latestActivity) {
-            // Safely cast the JSON metadata to our expected type
-            const metadata = latestActivity.metadata as unknown as ActivityMetadata;
+            // Safely access metadata properties
+            const metadata = latestActivity.metadata as any;
             coursesProgress.push({
               courseId,
               title: metadata?.title || 'Untitled Course',

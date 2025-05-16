@@ -2,7 +2,6 @@
 import { formatDistanceToNow } from 'date-fns';
 import { Award, BookOpen, Clock, Video, TrendingUp } from 'lucide-react';
 import { UserActivity } from '@/hooks/useUserActivities';
-import { ActivityMetadata } from '@/utils/activityLogger';
 import { Json } from '@/integrations/supabase/types';
 
 const getActivityIcon = (activityType: string) => {
@@ -22,8 +21,8 @@ const getActivityIcon = (activityType: string) => {
 };
 
 const getActivityTitle = (activity: UserActivity) => {
-  // Safely cast metadata to ActivityMetadata
-  const metadata = activity.metadata as unknown as ActivityMetadata;
+  // Safely access metadata properties
+  const metadata = activity.metadata as any;
   
   switch (activity.activity_type) {
     case 'course_view':
@@ -44,8 +43,8 @@ const getActivityTitle = (activity: UserActivity) => {
 };
 
 const getActivityDescription = (activity: UserActivity) => {
-  // Safely cast metadata to ActivityMetadata
-  const metadata = activity.metadata as unknown as ActivityMetadata;
+  // Safely access metadata properties
+  const metadata = activity.metadata as any;
   
   switch (activity.activity_type) {
     case 'course_progress':

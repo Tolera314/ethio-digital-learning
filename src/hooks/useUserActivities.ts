@@ -9,7 +9,7 @@ export interface UserActivity {
   resource_id: string | null;
   resource_type: string | null;
   created_at: string;
-  metadata: unknown;
+  metadata: unknown; // Using unknown to avoid recursive type issues
 }
 
 export interface CourseProgress {

@@ -25,7 +25,8 @@ const getActivityTitle = (activity: UserActivity) => {
   let title = '';
   
   if (metadata && typeof metadata === 'object') {
-    const titleValue = (metadata as Record<string, unknown>).title;
+    const metadataObj = metadata as Record<string, unknown>;
+    const titleValue = metadataObj.title;
     title = typeof titleValue === 'string' ? titleValue : '';
   }
   

@@ -12,7 +12,7 @@ export type ActivityType =
   | 'session_join'
   | 'login';
 
-// Define ActivityMetadata with simple types only
+// Define ActivityMetadata with primitive types only
 export interface ActivityMetadata {
   title?: string;
   progress?: number;
@@ -40,12 +40,13 @@ export const logActivity = async (
       return;
     }
 
+    // Insert without referencing the problematic Json type
     const { error } = await supabase.from('user_activities').insert({
       user_id: session.user.id,
       activity_type: activityType,
       resource_id: resourceId,
       resource_type: resourceType,
-      metadata: metadata
+      metadata: metadata as Record<string, unknown>
     });
 
     if (error) {

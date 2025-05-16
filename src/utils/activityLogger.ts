@@ -84,9 +84,9 @@ export const getUserActivitySummary = async () => {
     
     // Calculate total learning time in minutes
     const totalMinutes = timeData?.reduce((total, activity) => {
-      // Safe access to metadata properties
+      // Safe access to metadata properties by using simple type assertion
       const metadata = activity.metadata as any;
-      return total + (metadata?.duration || 0);
+      return total + (Number(metadata?.duration) || 0);
     }, 0) || 0;
     
     // Get total courses in progress
@@ -94,20 +94,19 @@ export const getUserActivitySummary = async () => {
       .from('user_activities')
       .select('resource_id')
       .eq('activity_type', 'course_progress')
-      .eq('user_id', session.user.id)
-      .is('metadata->completed', null);
+      .eq('user_id', session.user.id);
     
     if (courseError) throw courseError;
     
     const coursesInProgress = new Set(courseData?.map(c => c.resource_id)).size;
     
-    // Get completed courses
+    // Get completed courses - use is for null checking instead of eq for boolean
     const { data: completedData, error: completedError } = await supabase
       .from('user_activities')
       .select('resource_id')
       .eq('activity_type', 'course_progress')
       .eq('user_id', session.user.id)
-      .eq('metadata->completed', true);
+      .not('metadata->completed', 'is', null);
     
     if (completedError) throw completedError;
     

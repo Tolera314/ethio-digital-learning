@@ -20,27 +20,17 @@ const getActivityIcon = (activityType: string) => {
 };
 
 const getActivityTitle = (activity: UserActivity) => {
-  // Safely extract metadata properties
-  const metadata = activity.metadata;
-  let title = '';
-  
-  if (metadata && typeof metadata === 'object') {
-    // Access title safely
-    const metadataObj = metadata as any;
-    title = typeof metadataObj.title === 'string' ? metadataObj.title : '';
-  }
-  
   switch (activity.activity_type) {
     case 'course_view':
-      return `Viewed ${title || 'a course'}`;
+      return `Viewed ${activity.metadata?.title || 'a course'}`;
     case 'course_progress':
-      return `Made progress in ${title || 'a course'}`;
+      return `Made progress in ${activity.metadata?.title || 'a course'}`;
     case 'lesson_complete':
-      return `Completed ${title || 'a lesson'}`;
+      return `Completed ${activity.metadata?.title || 'a lesson'}`;
     case 'certificate_earned':
-      return `Earned ${title || 'a certificate'}`;
+      return `Earned ${activity.metadata?.title || 'a certificate'}`;
     case 'session_join':
-      return `Joined ${title || 'a live session'}`;
+      return `Joined ${activity.metadata?.title || 'a live session'}`;
     case 'login':
       return 'Logged in';
     default:
@@ -49,32 +39,17 @@ const getActivityTitle = (activity: UserActivity) => {
 };
 
 const getActivityDescription = (activity: UserActivity) => {
-  // Safely extract metadata properties
-  const metadata = activity.metadata;
-  
-  if (!metadata || typeof metadata !== 'object') {
-    return '';
-  }
-  
-  // Access metadata properties safely
-  const metadataObj = metadata as any;
-  
   switch (activity.activity_type) {
     case 'course_progress':
-      const progress = metadataObj.progress;
-      return typeof progress === 'number' 
-        ? `${Math.round(progress)}% complete` 
+      return activity.metadata?.progress 
+        ? `${Math.round(activity.metadata.progress)}% complete` 
         : '';
     case 'lesson_complete':
-      const duration = metadataObj.duration;
-      return typeof duration === 'number' 
-        ? `${duration} minutes` 
+      return activity.metadata?.duration 
+        ? `${activity.metadata.duration} minutes` 
         : '';
     case 'certificate_earned':
-      const category = metadataObj.category;
-      return typeof category === 'string'
-        ? `In ${category || 'technology'}`
-        : '';
+      return `In ${activity.metadata?.category || 'technology'}`;
     default:
       return '';
   }

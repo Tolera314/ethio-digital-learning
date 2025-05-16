@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Bell, Users, Video } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
@@ -29,10 +30,7 @@ const StudentDashboard = () => {
     
     // Log this dashboard view as an activity
     if (user) {
-      // Use setTimeout to prevent potential auth deadlock
-      setTimeout(() => {
-        logActivity('login');
-      }, 0);
+      logActivity('login');
     }
   }, [user, loading, navigate]);
 

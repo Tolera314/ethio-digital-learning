@@ -27,7 +27,7 @@ const ReadingSessions = ({ book, onCreateSession }: ReadingSessionsProps) => {
     queryKey: ["reading-sessions", book.id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("reading_sessions")
+        .from("reading_sessions" as any)
         .select("*")
         .eq("book_id", book.id)
         .eq("is_active", true)
@@ -45,14 +45,14 @@ const ReadingSessions = ({ book, onCreateSession }: ReadingSessionsProps) => {
       if (!sessions || sessions.length === 0) return {};
       
       const { data, error } = await supabase
-        .from("session_participants")
+        .from("session_participants" as any)
         .select("session_id, id")
         .in("session_id", sessions.map(s => s.id));
         
       if (error) throw error;
       
       // Count participants per session
-      return data.reduce((acc, curr) => {
+      return (data as any[]).reduce((acc, curr) => {
         if (!acc[curr.session_id]) {
           acc[curr.session_id] = 0;
         }
@@ -69,13 +69,13 @@ const ReadingSessions = ({ book, onCreateSession }: ReadingSessionsProps) => {
       if (!user || !sessions || sessions.length === 0) return [];
       
       const { data, error } = await supabase
-        .from("session_participants")
+        .from("session_participants" as any)
         .select("session_id")
         .eq("user_id", user.id)
         .in("session_id", sessions.map(s => s.id));
         
       if (error) throw error;
-      return data.map(p => p.session_id);
+      return (data as any[]).map(p => p.session_id);
     },
   });
   
@@ -91,7 +91,7 @@ const ReadingSessions = ({ book, onCreateSession }: ReadingSessionsProps) => {
       
       if (!isAlreadyJoined) {
         const { error } = await supabase
-          .from("session_participants")
+          .from("session_participants" as any)
           .insert({
             session_id: session.id,
             user_id: user.id,

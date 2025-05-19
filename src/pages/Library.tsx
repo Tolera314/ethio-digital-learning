@@ -54,7 +54,7 @@ const Library = () => {
     queryKey: ["active-sessions"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("reading_sessions")
+        .from("reading_sessions" as any)
         .select("*")
         .eq("is_active", true)
         .order("created_at", { ascending: false })

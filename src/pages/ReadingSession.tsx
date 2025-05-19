@@ -35,7 +35,7 @@ const ReadingSessionPage = () => {
       if (!sessionId) throw new Error("Session ID is required");
       
       const { data, error } = await supabase
-        .from("reading_sessions")
+        .from("reading_sessions" as any)
         .select("*")
         .eq("id", sessionId)
         .single();
@@ -71,29 +71,30 @@ const ReadingSessionPage = () => {
       if (!sessionId) throw new Error("Session ID is required");
       
       const { data, error } = await supabase
-        .from("session_participants")
+        .from("session_participants" as any)
         .select("*")
         .eq("session_id", sessionId);
         
       if (error) throw error;
       
-      setParticipantCount(data.length);
+      const typedData = data as unknown as SessionParticipant[];
+      setParticipantCount(typedData.length);
       
       // Check if current user has joined
       if (user) {
-        const joined = data.some(p => p.user_id === user.id);
+        const joined = typedData.some(p => p.user_id === user.id);
         setHasJoined(joined);
         
         // If joined, set current page
         if (joined) {
-          const userParticipant = data.find(p => p.user_id === user.id);
+          const userParticipant = typedData.find(p => p.user_id === user.id);
           if (userParticipant) {
             setCurrentPage(userParticipant.current_page);
           }
         }
       }
       
-      return data as SessionParticipant[];
+      return typedData;
     },
     enabled: !!sessionId && !!user,
   });
@@ -105,7 +106,7 @@ const ReadingSessionPage = () => {
       if (!sessionId) throw new Error("Session ID is required");
       
       const { data, error } = await supabase
-        .from("session_comments")
+        .from("session_comments" as any)
         .select("*")
         .eq("session_id", sessionId)
         .order("created_at", { ascending: true });
@@ -152,7 +153,7 @@ const ReadingSessionPage = () => {
       
       try {
         await supabase
-          .from("session_participants")
+          .from("session_participants" as any)
           .update({
             last_active_at: new Date().toISOString(),
             current_page,
@@ -179,7 +180,7 @@ const ReadingSessionPage = () => {
     
     try {
       const { error } = await supabase
-        .from("session_participants")
+        .from("session_participants" as any)
         .insert({
           session_id: sessionId,
           user_id: user.id,
@@ -208,7 +209,7 @@ const ReadingSessionPage = () => {
     
     try {
       const { error } = await supabase
-        .from("session_comments")
+        .from("session_comments" as any)
         .insert({
           session_id: sessionId,
           user_id: user.id,

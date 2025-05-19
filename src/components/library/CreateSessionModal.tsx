@@ -58,8 +58,9 @@ const CreateSessionModal = ({ book, isOpen, onClose, onSessionCreated }: CreateS
     setIsSubmitting(true);
     
     try {
+      // TypeScript doesn't know about our new tables, so we need to use "as any"
       const { data: sessionData, error } = await supabase
-        .from("reading_sessions")
+        .from("reading_sessions" as any)
         .insert({
           book_id: book.id,
           created_by: user.id,
@@ -74,7 +75,7 @@ const CreateSessionModal = ({ book, isOpen, onClose, onSessionCreated }: CreateS
       
       // Join the session as the creator
       await supabase
-        .from("session_participants")
+        .from("session_participants" as any)
         .insert({
           session_id: sessionData.id,
           user_id: user.id,

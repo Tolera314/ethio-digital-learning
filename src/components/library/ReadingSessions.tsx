@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
@@ -34,7 +33,7 @@ const ReadingSessions = ({ book, onCreateSession }: ReadingSessionsProps) => {
         .order("created_at", { ascending: false });
         
       if (error) throw error;
-      return data as ReadingSession[];
+      return data as unknown as ReadingSession[];
     },
   });
 

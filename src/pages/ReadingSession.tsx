@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -41,7 +40,7 @@ const ReadingSessionPage = () => {
         .single();
         
       if (error) throw error;
-      return data as ReadingSession;
+      return data as unknown as ReadingSession;
     },
     enabled: !!sessionId,
   });
@@ -112,7 +111,7 @@ const ReadingSessionPage = () => {
         .order("created_at", { ascending: true });
         
       if (error) throw error;
-      return data as SessionComment[];
+      return data as unknown as SessionComment[];
     },
     enabled: !!sessionId,
   });
@@ -156,7 +155,7 @@ const ReadingSessionPage = () => {
           .from("session_participants" as any)
           .update({
             last_active_at: new Date().toISOString(),
-            current_page,
+            current_page: currentPage,
           })
           .eq("session_id", sessionId)
           .eq("user_id", user.id);

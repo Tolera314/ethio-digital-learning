@@ -69,7 +69,9 @@ export const getUserActivitySummary = async () => {
         coursesInProgress: 0,
         completedCourses: 0,
         totalCertificates: 0,
-        enrolledCourses: 0
+        enrolledCourses: 0,
+        totalBooks: 0,
+        totalReadingSessions: 0
       };
     }
 
@@ -133,15 +135,21 @@ export const getUserActivitySummary = async () => {
     
     const totalBooks = booksData?.length || 0;
     
-    // Get reading sessions
-    const { data: sessionsData, error: sessionsError } = await supabase
-      .from('session_participants')
-      .select('session_id')
-      .eq('user_id', session.user.id);
-      
-    if (sessionsError) throw sessionsError;
-    
-    const totalReadingSessions = new Set(sessionsData?.map(s => s.session_id)).size;
+    // Get reading sessions - using type assertions for newly created tables
+    let totalReadingSessions = 0;
+    try {
+      const { data: sessionsData } = await supabase
+        .from("session_participants" as any)
+        .select("session_id")
+        .eq("user_id", session.user.id);
+        
+      if (sessionsData) {
+        const uniqueSessionIds = new Set((sessionsData as any[]).map(s => s.session_id));
+        totalReadingSessions = uniqueSessionIds.size;
+      }
+    } catch (error) {
+      console.error('Error getting session participants:', error);
+    }
     
     return {
       totalLearningTime: totalMinutes,

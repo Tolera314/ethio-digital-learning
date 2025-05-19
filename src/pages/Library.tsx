@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -61,7 +60,7 @@ const Library = () => {
         .limit(5);
         
       if (error) throw error;
-      return data as ReadingSession[];
+      return data as unknown as ReadingSession[];
     },
   });
   

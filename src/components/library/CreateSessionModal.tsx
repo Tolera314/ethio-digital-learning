@@ -58,7 +58,7 @@ const CreateSessionModal = ({ book, isOpen, onClose, onSessionCreated }: CreateS
     setIsSubmitting(true);
     
     try {
-      // TypeScript doesn't know about our new tables, so we need to use "as any"
+      // Using explicit type assertions for our newly created tables
       const { data: sessionData, error } = await supabase
         .from("reading_sessions" as any)
         .insert({
@@ -69,7 +69,7 @@ const CreateSessionModal = ({ book, isOpen, onClose, onSessionCreated }: CreateS
           meeting_link: data.meetingLink || null
         })
         .select("*")
-        .single();
+        .single() as { data: any; error: any };
         
       if (error) throw error;
       
@@ -77,14 +77,14 @@ const CreateSessionModal = ({ book, isOpen, onClose, onSessionCreated }: CreateS
       await supabase
         .from("session_participants" as any)
         .insert({
-          session_id: sessionData.id,
+          session_id: sessionData?.id, // Use optional chaining to safely access id
           user_id: user.id,
         });
         
       // Log activity
       await logActivity(
         'session_join',
-        sessionData.id,
+        sessionData?.id, // Use optional chaining to safely access id
         'reading_session',
         { 
           title: data.title,

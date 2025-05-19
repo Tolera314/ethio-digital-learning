@@ -1,15 +1,28 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Filter, Star, Users, Clock, ChevronRight, BookOpen, TrendingUp, Award, CheckCircle, SearchIcon } from "lucide-react";
+import { Filter, Star, Users, Clock, ChevronRight, BookOpen, TrendingUp, Award, CheckCircle, SearchIcon, Download, Share, Eye } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PageLayout from "@/components/PageLayout";
 import CallToAction from "@/components/CallToAction";
 import PageHeader from "@/components/PageHeader";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
+import { 
+  enrollInCourse, 
+  filterByPopularity, 
+  viewLearningPath, 
+  continueLearning,
+  viewCourseDetails,
+  reviewCourse,
+  downloadCourseMaterials,
+  shareCourse,
+  browseAllCourses
+} from "@/utils/courseActions";
 
 const categories = [
   "All Courses",
@@ -116,11 +129,19 @@ function useScrollReveal() {
 
 const Courses = () => {
   useScrollReveal();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState("All Courses");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showFilterPopular, setShowFilterPopular] = useState(false);
+  
+  // Get the learning path from URL if any
+  const queryParams = new URLSearchParams(location.search);
+  const pathFromUrl = queryParams.get('path');
   
   const { data: courses, isLoading } = useQuery({
-    queryKey: ["courses", selectedCategory, searchQuery],
+    queryKey: ["courses", selectedCategory, searchQuery, showFilterPopular],
     queryFn: async () => {
       // You would implement real filtering logic here with supabase
       // This is a mock implementation using the featuredCourses array
@@ -136,9 +157,51 @@ const Courses = () => {
         );
       }
       
+      if (showFilterPopular) {
+        filteredCourses = filterByPopularity(filteredCourses);
+      }
+      
       return filteredCourses;
     },
   });
+
+  // Track enrolled courses state for UI purposes
+  const [enrolledCourses, setEnrolledCourses] = useState<number[]>([]);
+  
+  const handleEnroll = async (courseId: number) => {
+    const success = await enrollInCourse(courseId, user?.id);
+    if (success) {
+      setEnrolledCourses(prev => [...prev, courseId]);
+    }
+  };
+  
+  const handleViewPath = (pathTitle: string) => {
+    viewLearningPath(pathTitle, navigate);
+  };
+  
+  const handleContinueLearning = (courseId: number) => {
+    continueLearning(courseId, navigate);
+  };
+  
+  const handleViewDetails = (courseId: number) => {
+    viewCourseDetails(courseId, navigate);
+  };
+  
+  const handleDownload = (courseId: number, title: string) => {
+    downloadCourseMaterials(courseId, `${title} - Materials`);
+  };
+  
+  const handleShare = (courseId: number, title: string) => {
+    shareCourse(courseId, title);
+  };
+  
+  const handleToggleFilterPopular = () => {
+    setShowFilterPopular(prev => !prev);
+  };
+  
+  const handleBrowseAllCourses = () => {
+    browseAllCourses(navigate);
+  };
 
   return (
     <PageLayout
@@ -160,11 +223,17 @@ const Courses = () => {
             />
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" className="border-white/10 bg-black/30 text-white hover:bg-white/10">
+            <Button 
+              variant="outline" 
+              className="border-white/10 bg-black/30 text-white hover:bg-white/10"
+            >
               <Filter size={16} className="mr-2" /> Filter
             </Button>
-            <Button className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
-              Popular
+            <Button 
+              className={`${showFilterPopular ? 'bg-pink-600' : 'bg-gradient-to-r from-purple-600 to-blue-600'} text-white`}
+              onClick={handleToggleFilterPopular}
+            >
+              <Star size={16} className="mr-2" /> Popular
             </Button>
           </div>
         </div>
@@ -199,8 +268,28 @@ const Courses = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses?.map((course) => (
             <Card key={course.id} className="glass-morphism border-0 shadow-lg overflow-hidden hover:shadow-purple-500/20 transition-all duration-300 hover:translate-y-[-5px]">
-              <div className="h-48 overflow-hidden">
-                <img src={course.image} alt={course.title} className="w-full h-full object-cover transition-all duration-700 hover:scale-110" />
+              <div className="h-48 overflow-hidden relative group">
+                <img src={course.image} alt={course.title} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="bg-black/50 border-white/30 text-white hover:bg-white/20"
+                      onClick={() => handleViewDetails(course.id)}
+                    >
+                      <Eye size={14} className="mr-1" /> View Details
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="bg-black/50 border-white/30 text-white hover:bg-white/20"
+                      onClick={() => handleShare(course.id, course.title)}
+                    >
+                      <Share size={14} className="mr-1" /> Share
+                    </Button>
+                  </div>
+                </div>
               </div>
               <CardHeader>
                 <div className="flex justify-between items-center mb-2">
@@ -226,8 +315,40 @@ const Courses = () => {
                 </div>
                 <div className="font-semibold text-purple-300 text-right">{course.price}</div>
               </CardContent>
-              <CardFooter>
-                <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600">Enroll Now</Button>
+              <CardFooter className="flex flex-col gap-2">
+                {enrolledCourses.includes(course.id) ? (
+                  <Button 
+                    className="w-full bg-green-600 hover:bg-green-700"
+                    onClick={() => handleContinueLearning(course.id)}
+                  >
+                    Continue Learning
+                  </Button>
+                ) : (
+                  <Button 
+                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600"
+                    onClick={() => handleEnroll(course.id)}
+                  >
+                    Enroll Now
+                  </Button>
+                )}
+                <div className="flex w-full justify-between gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1 border-white/10 hover:bg-white/5"
+                    onClick={() => handleDownload(course.id, course.title)}
+                  >
+                    <Download size={14} className="mr-1" /> Syllabus
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1 border-white/10 hover:bg-white/5"
+                    onClick={() => {}}
+                  >
+                    Review Course
+                  </Button>
+                </div>
               </CardFooter>
             </Card>
           ))}
@@ -289,7 +410,11 @@ const Courses = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button variant="outline" className="w-full border-white/10 hover:bg-white/5">
+                <Button 
+                  variant="outline" 
+                  className="w-full border-white/10 hover:bg-white/5"
+                  onClick={() => handleViewPath(path.title)}
+                >
                   View Path <ChevronRight size={16} className="ml-1" />
                 </Button>
               </CardFooter>

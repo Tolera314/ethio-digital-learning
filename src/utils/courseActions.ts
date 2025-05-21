@@ -230,3 +230,44 @@ const fallbackShare = (courseId: number, courseTitle: string) => {
 export const browseAllCourses = (navigate: any) => {
   navigate('/courses');
 };
+
+// Set a reminder for a course
+export const remindAboutCourse = (courseId: number, courseTitle: string, userId?: string) => {
+  if (!userId) {
+    toast({
+      title: "Authentication required",
+      description: "Please login to set reminders",
+      variant: "destructive"
+    });
+    return false;
+  }
+
+  // In a real app, this would save to the database
+  toast({
+    title: "Reminder set",
+    description: `We'll remind you about "${courseTitle}" soon`,
+  });
+  
+  return true;
+};
+
+// Open review dialog for a course
+export const openReviewDialog = (courseId: number, courseTitle: string, userId?: string) => {
+  if (!userId) {
+    toast({
+      title: "Authentication required",
+      description: "Please login to review courses",
+      variant: "destructive"
+    });
+    return false;
+  }
+  
+  // This would normally open a dialog component
+  // For now, we just show a toast
+  toast({
+    title: "Review",
+    description: `Add your review for "${courseTitle}"`,
+  });
+  
+  return true;
+};

@@ -7,13 +7,19 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { Star, Clock, Users, Download, Share, BookOpen, CheckCircle, Play } from "lucide-react";
+import { Star, Clock, Users, Download, Share, BookOpen, CheckCircle, Play, Bell } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
 import PageHeader from "@/components/PageHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
-import { enrollInCourse, downloadCourseMaterials, shareCourse } from "@/utils/courseActions";
-import { featuredCourses } from "@/utils/courseActions";
+import { 
+  enrollInCourse, 
+  downloadCourseMaterials, 
+  shareCourse, 
+  remindAboutCourse, 
+  openReviewDialog, 
+  featuredCourses 
+} from "@/utils/courseActions";
 
 const CourseDetails = () => {
   const { courseId } = useParams();
@@ -74,6 +80,18 @@ const CourseDetails = () => {
   
   const handleStartLearning = () => {
     navigate(`/courses/${courseId}/learn`);
+  };
+
+  const handleRemind = () => {
+    if (course) {
+      remindAboutCourse(course.id, course.title, user?.id);
+    }
+  };
+
+  const handleReview = () => {
+    if (course) {
+      openReviewDialog(course.id, course.title, user?.id);
+    }
   };
   
   if (isLoading || !course) {
@@ -151,6 +169,13 @@ const CourseDetails = () => {
                   >
                     <Share size={16} className="mr-1" /> Share
                   </Button>
+                  <Button 
+                    variant="outline" 
+                    className="border-white/10 hover:bg-white/5"
+                    onClick={handleReview}
+                  >
+                    <Star size={16} className="mr-1" /> Review
+                  </Button>
                 </div>
                 <div className="font-semibold text-xl text-purple-300">{course.price}</div>
               </CardFooter>
@@ -197,7 +222,7 @@ const CourseDetails = () => {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="flex flex-col gap-3">
                 {isEnrolled ? (
                   <Button 
                     className="w-full bg-gradient-to-r from-green-600 to-teal-600"
@@ -206,12 +231,21 @@ const CourseDetails = () => {
                     <Play size={16} className="mr-1" /> Continue Learning
                   </Button>
                 ) : (
-                  <Button 
-                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600"
-                    onClick={handleEnroll}
-                  >
-                    Enroll Now
-                  </Button>
+                  <>
+                    <Button 
+                      className="w-full bg-gradient-to-r from-purple-600 to-blue-600"
+                      onClick={handleEnroll}
+                    >
+                      Enroll Now
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full text-gray-400"
+                      onClick={handleRemind}
+                    >
+                      <Bell size={16} className="mr-1" /> Remind Me
+                    </Button>
+                  </>
                 )}
               </CardFooter>
             </Card>
@@ -303,7 +337,7 @@ const CourseDetails = () => {
                             <span className="text-gray-300">{lesson}</span>
                           </div>
                           {isEnrolled ? (
-                            <Button size="sm" variant="ghost" className="text-xs opacity-70">
+                            <Button size="sm" variant="ghost" className="text-xs opacity-70" onClick={handleStartLearning}>
                               <Play size={12} className="mr-1" /> Preview
                             </Button>
                           ) : (

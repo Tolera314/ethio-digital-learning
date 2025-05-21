@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Filter, Star, Users, Clock, ChevronRight, BookOpen, TrendingUp, Award, CheckCircle, SearchIcon, Download, Share, Eye } from "lucide-react";
+import { Filter, Star, Users, Clock, ChevronRight, BookOpen, TrendingUp, Award, CheckCircle, SearchIcon, Download, Share, Eye, Bell } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PageLayout from "@/components/PageLayout";
 import CallToAction from "@/components/CallToAction";
@@ -21,7 +21,10 @@ import {
   reviewCourse,
   downloadCourseMaterials,
   shareCourse,
-  browseAllCourses
+  browseAllCourses,
+  remindAboutCourse,
+  openReviewDialog,
+  Course
 } from "@/utils/courseActions";
 
 const categories = [
@@ -194,6 +197,14 @@ const Courses = () => {
   const handleShare = (courseId: number, title: string) => {
     shareCourse(courseId, title);
   };
+
+  const handleRemind = (courseId: number, title: string) => {
+    remindAboutCourse(courseId, title, user?.id);
+  };
+  
+  const handleReviewCourse = (courseId: number, title: string) => {
+    openReviewDialog(courseId, title, user?.id);
+  };
   
   const handleToggleFilterPopular = () => {
     setShowFilterPopular(prev => !prev);
@@ -226,6 +237,7 @@ const Courses = () => {
             <Button 
               variant="outline" 
               className="border-white/10 bg-black/30 text-white hover:bg-white/10"
+              onClick={() => browseAllCourses(navigate)}
             >
               <Filter size={16} className="mr-2" /> Filter
             </Button>
@@ -344,11 +356,19 @@ const Courses = () => {
                     variant="outline" 
                     size="sm" 
                     className="flex-1 border-white/10 hover:bg-white/5"
-                    onClick={() => {}}
+                    onClick={() => handleReviewCourse(course.id, course.title)}
                   >
-                    Review Course
+                    <Star size={14} className="mr-1" /> Review
                   </Button>
                 </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full text-xs text-gray-400 hover:text-white"
+                  onClick={() => handleRemind(course.id, course.title)}
+                >
+                  <Bell size={14} className="mr-1" /> Remind me later
+                </Button>
               </CardFooter>
             </Card>
           ))}

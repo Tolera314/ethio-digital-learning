@@ -48,6 +48,123 @@ export type Database = {
         }
         Relationships: []
       }
+      reading_sessions: {
+        Row: {
+          book_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          end_time: string | null
+          id: string
+          is_active: boolean
+          meeting_link: string | null
+          start_time: string
+          title: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          end_time?: string | null
+          id?: string
+          is_active?: boolean
+          meeting_link?: string | null
+          start_time?: string
+          title: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          end_time?: string | null
+          id?: string
+          is_active?: boolean
+          meeting_link?: string | null
+          start_time?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_sessions_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          page_number: number | null
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          page_number?: number | null
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          page_number?: number | null
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_comments_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "reading_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_participants: {
+        Row: {
+          current_page: number
+          id: string
+          joined_at: string
+          last_active_at: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          current_page?: number
+          id?: string
+          joined_at?: string
+          last_active_at?: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          current_page?: number
+          id?: string
+          joined_at?: string
+          last_active_at?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_participants_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "reading_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_activities: {
         Row: {
           activity_type: string

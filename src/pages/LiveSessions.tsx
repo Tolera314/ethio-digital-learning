@@ -7,9 +7,12 @@ import { Calendar, Clock, Users, Video, Calendar as CalendarIcon, Bell, Plus } f
 import PageLayout from "@/components/PageLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CreateSessionModal from "@/components/CreateSessionModal";
+import JoinSessionModal from "@/components/JoinSessionModal";
 import VideoCall from "@/components/VideoCall";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const initialUpcomingSessions = [
   {
@@ -153,12 +156,15 @@ const SessionCard = ({
 
 const LiveSessions = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [selectedSession, setSelectedSession] = useState<any>(null);
   const [activeVideoCall, setActiveVideoCall] = useState<boolean>(false);
   const [upcomingSessions, setUpcomingSessions] = useState(initialUpcomingSessions);
   const [userData, setUserData] = useState<{ username: string, email: string } | null>(null);
   const [isHost, setIsHost] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Get user data from session on page load
   useEffect(() => {
@@ -179,7 +185,7 @@ const LiveSessions = () => {
     }
 
     getUserData();
-  }, []);
+  }, [user]);
 
   const handleCreateSession = (newSession: any) => {
     setUpcomingSessions([newSession, ...upcomingSessions]);
@@ -192,19 +198,25 @@ const LiveSessions = () => {
     });
   };
 
-  const handleJoinSession = (session: any) => {
-    if (!userData) {
+  const handleJoinSessionClick = (session: any) => {
+    if (!user) {
       toast({
         title: "Authentication Required",
         description: "Please sign in to join the session",
         variant: "destructive"
       });
+      navigate("/auth");
       return;
     }
 
     setSelectedSession(session);
+    setIsJoinModalOpen(true);
+  };
+
+  const handleJoinSession = (username: string, email: string) => {
     setIsHost(false);
     setActiveVideoCall(true);
+    setIsJoinModalOpen(false);
     toast({
       title: "Session Joined",
       description: "You have successfully joined the live session"
@@ -226,6 +238,19 @@ const LiveSessions = () => {
       title: "Session Left",
       description: "You have left the live session"
     });
+  };
+
+  const handleHostNewSession = () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to host a session",
+        variant: "destructive"
+      });
+      navigate("/auth");
+      return;
+    }
+    setIsCreateModalOpen(true);
   };
 
   if (activeVideoCall && selectedSession && userData) {
@@ -258,17 +283,7 @@ const LiveSessions = () => {
         <div className="flex justify-end mb-6">
           <Button
             className="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white"
-            onClick={() => {
-              if (userData) {
-                setIsCreateModalOpen(true);
-              } else {
-                toast({
-                  title: "Authentication Required",
-                  description: "Please sign in to host a session",
-                  variant: "destructive"
-                });
-              }
-            }}
+            onClick={handleHostNewSession}
           >
             <Plus className="mr-2 h-4 w-4" /> Host New Session
           </Button>
@@ -300,7 +315,7 @@ const LiveSessions = () => {
                 <SessionCard 
                   key={session.id} 
                   session={session} 
-                  onJoin={handleJoinSession}
+                  onJoin={handleJoinSessionClick}
                   onRemind={handleRemindSession}
                 />
               ))}
@@ -322,6 +337,13 @@ const LiveSessions = () => {
         open={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSessionCreated={handleCreateSession}
+      />
+
+      <JoinSessionModal
+        open={isJoinModalOpen}
+        onClose={() => setIsJoinModalOpen(false)}
+        session={selectedSession}
+        onJoin={handleJoinSession}
       />
     </PageLayout>
   );

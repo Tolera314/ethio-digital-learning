@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,6 @@ import { Calendar, Clock, Users, Video, Calendar as CalendarIcon, Bell, Plus } f
 import PageLayout from "@/components/PageLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CreateSessionModal from "@/components/CreateSessionModal";
-import JoinSessionModal from "@/components/JoinSessionModal";
 import VideoCall from "@/components/VideoCall";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -77,11 +77,13 @@ const pastSessions = [
 const SessionCard = ({ 
   session, 
   isPast = false, 
-  onJoin 
+  onJoin,
+  onRemind
 }: { 
   session: any; 
   isPast?: boolean; 
   onJoin?: (session: any) => void;
+  onRemind?: (session: any) => void;
 }) => (
   <Card className="overflow-hidden bg-black/40 border border-white/10 backdrop-blur-lg shadow-lg hover:shadow-purple-500/20 transition-all duration-300 transform hover:-translate-y-1">
     <div className="relative h-32 sm:h-40">
@@ -136,7 +138,11 @@ const SessionCard = ({
           >
             Join Session
           </Button>
-          <Button variant="outline" className="w-full sm:w-auto border-white/20 hover:bg-white/10 text-sm">
+          <Button 
+            variant="outline" 
+            className="w-full sm:w-auto border-white/20 hover:bg-white/10 text-sm"
+            onClick={() => onRemind && onRemind(session)}
+          >
             <Bell className="w-4 h-4 mr-1" /> Remind
           </Button>
         </div>
@@ -147,13 +153,11 @@ const SessionCard = ({
 
 const LiveSessions = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [selectedSession, setSelectedSession] = useState<any>(null);
   const [activeVideoCall, setActiveVideoCall] = useState<boolean>(false);
-  const [currentUsername, setCurrentUsername] = useState<string>("");
-  const [currentEmail, setCurrentEmail] = useState<string>("");
   const [upcomingSessions, setUpcomingSessions] = useState(initialUpcomingSessions);
   const [userData, setUserData] = useState<{ username: string, email: string } | null>(null);
+  const [isHost, setIsHost] = useState(false);
   const { toast } = useToast();
 
   // Get user data from session on page load
@@ -179,27 +183,27 @@ const LiveSessions = () => {
 
   const handleCreateSession = (newSession: any) => {
     setUpcomingSessions([newSession, ...upcomingSessions]);
+    setSelectedSession(newSession);
+    setIsHost(true);
+    setActiveVideoCall(true);
     toast({
       title: "Session Created",
-      description: "Your live session has been successfully created"
+      description: "Your live session has been successfully created and started"
     });
   };
 
   const handleJoinSession = (session: any) => {
-    setSelectedSession(session);
-    
-    // If we already have user data, join directly
-    if (userData && userData.email && userData.username) {
-      handleStartVideoCall(userData.username, userData.email);
-    } else {
-      // Fall back to modal if no user data available
-      setIsJoinModalOpen(true);
+    if (!userData) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to join the session",
+        variant: "destructive"
+      });
+      return;
     }
-  };
 
-  const handleStartVideoCall = (username: string, email: string) => {
-    setCurrentUsername(username);
-    setCurrentEmail(email);
+    setSelectedSession(session);
+    setIsHost(false);
     setActiveVideoCall(true);
     toast({
       title: "Session Joined",
@@ -207,16 +211,24 @@ const LiveSessions = () => {
     });
   };
 
+  const handleRemindSession = (session: any) => {
+    toast({
+      title: "Reminder Set",
+      description: `You will be notified about "${session.title}" session`,
+    });
+  };
+
   const handleExitVideoCall = () => {
     setActiveVideoCall(false);
     setSelectedSession(null);
+    setIsHost(false);
     toast({
       title: "Session Left",
       description: "You have left the live session"
     });
   };
 
-  if (activeVideoCall && selectedSession) {
+  if (activeVideoCall && selectedSession && userData) {
     return (
       <PageLayout
         title={`Live Session: ${selectedSession.title}`}
@@ -226,9 +238,9 @@ const LiveSessions = () => {
         <div className="w-full max-w-7xl mx-auto">
           <VideoCall
             sessionId={selectedSession.id.toString()}
-            username={currentUsername}
-            email={currentEmail}
-            isHost={false}
+            username={userData.username}
+            email={userData.email}
+            isHost={isHost}
             onExit={handleExitVideoCall}
           />
         </div>
@@ -248,7 +260,6 @@ const LiveSessions = () => {
             className="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white"
             onClick={() => {
               if (userData) {
-                // If we have user data, open create modal
                 setIsCreateModalOpen(true);
               } else {
                 toast({
@@ -290,6 +301,7 @@ const LiveSessions = () => {
                   key={session.id} 
                   session={session} 
                   onJoin={handleJoinSession}
+                  onRemind={handleRemindSession}
                 />
               ))}
             </div>
@@ -310,13 +322,6 @@ const LiveSessions = () => {
         open={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSessionCreated={handleCreateSession}
-      />
-
-      <JoinSessionModal
-        open={isJoinModalOpen}
-        onClose={() => setIsJoinModalOpen(false)}
-        session={selectedSession}
-        onJoin={handleStartVideoCall}
       />
     </PageLayout>
   );

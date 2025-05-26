@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Mic, MicOff, Video, VideoOff, PhoneOff, Users, ScreenShare, MessageSquare } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Mic, MicOff, Video, VideoOff, PhoneOff, Users, ScreenShare, MessageSquare, Edit3, Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -47,6 +48,9 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
     audioInputs: [],
     audioOutputs: []
   });
+  const [videoTitle, setVideoTitle] = useState("");
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [tempTitle, setTempTitle] = useState("");
   
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const screenShareRef = useRef<HTMLVideoElement>(null);
@@ -151,6 +155,13 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
                   return p;
                 })
               );
+            }
+          });
+          
+          // Listen for title updates
+          channel.on('broadcast', { event: 'title-update' }, (payload) => {
+            if (payload.payload && payload.payload.title !== undefined) {
+              setVideoTitle(payload.payload.title);
             }
           });
         }
@@ -366,6 +377,33 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
       }
     }
   };
+
+  const updateVideoTitle = (newTitle: string) => {
+    setVideoTitle(newTitle);
+    
+    // Broadcast title update to other participants
+    const channel = supabase.channel(`session-${sessionId}`);
+    channel.send({
+      type: 'broadcast',
+      event: 'title-update',
+      payload: { title: newTitle }
+    });
+  };
+
+  const handleTitleEdit = () => {
+    if (isEditingTitle) {
+      updateVideoTitle(tempTitle);
+      setIsEditingTitle(false);
+    } else {
+      setTempTitle(videoTitle);
+      setIsEditingTitle(true);
+    }
+  };
+
+  const cancelTitleEdit = () => {
+    setIsEditingTitle(false);
+    setTempTitle("");
+  };
   
   const startSession = async () => {
     if (!isHost) return;
@@ -572,6 +610,52 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
                   </div>
                 </div>
               )}
+              
+              {/* Video title overlay for host */}
+              {isHost && (
+                <div className="absolute top-2 left-2 right-2">
+                  {isEditingTitle ? (
+                    <div className="flex items-center gap-2 bg-black/70 rounded p-2">
+                      <Input
+                        value={tempTitle}
+                        onChange={(e) => setTempTitle(e.target.value)}
+                        placeholder="Enter video title..."
+                        className="flex-1 text-sm bg-transparent border-white/30"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleTitleEdit();
+                          if (e.key === 'Escape') cancelTitleEdit();
+                        }}
+                        autoFocus
+                      />
+                      <Button size="sm" variant="ghost" onClick={handleTitleEdit}>
+                        <Check size={14} />
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={cancelTitleEdit}>
+                        <X size={14} />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 bg-black/70 rounded p-2">
+                      <span className="text-white text-sm flex-1">
+                        {videoTitle || "Click to add title"}
+                      </span>
+                      <Button size="sm" variant="ghost" onClick={handleTitleEdit}>
+                        <Edit3 size={14} />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Host title display for participants */}
+              {!isHost && videoTitle && (
+                <div className="absolute top-2 left-2 right-2">
+                  <div className="bg-black/70 rounded p-2">
+                    <span className="text-white text-sm">{videoTitle}</span>
+                  </div>
+                </div>
+              )}
+              
               <div className="absolute bottom-2 left-2 flex items-center space-x-2">
                 <Badge variant="secondary" className="bg-black/70">
                   {username} (You)

@@ -7,7 +7,7 @@ import PageLayout from "@/components/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Book, Calendar, BookOpen, Users } from "lucide-react";
+import { BookOpen, Users } from "lucide-react";
 import type { Book as BookType } from "@/types/library";
 import ReadingSessions from "@/components/library/ReadingSessions";
 import CreateSessionModal from "@/components/library/CreateSessionModal";
@@ -154,12 +154,10 @@ const BookDetails = () => {
             </Card>
             
             {/* Reading Sessions */}
-            <div>
-              <ReadingSessions 
-                book={book} 
-                onCreateSession={() => setIsCreateSessionModalOpen(true)} 
-              />
-            </div>
+            <ReadingSessions 
+              book={book} 
+              onCreateSession={() => setIsCreateSessionModalOpen(true)} 
+            />
           </div>
         </div>
       </div>
@@ -170,7 +168,7 @@ const BookDetails = () => {
         isOpen={isCreateSessionModalOpen}
         onClose={() => setIsCreateSessionModalOpen(false)}
         onSessionCreated={() => {
-          // Could potentially trigger a refetch of the reading sessions
+          setIsCreateSessionModalOpen(false);
         }}
       />
     </PageLayout>

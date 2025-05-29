@@ -11,8 +11,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
 
 interface JoinSessionModalProps {
   open: boolean;
@@ -30,65 +31,40 @@ const JoinSessionModal = ({
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const { user } = useAuth();
 
-  // Get user data from Supabase session when modal opens
   useEffect(() => {
-    async function getUserData() {
-      try {
-        const { data: { session: authSession } } = await supabase.auth.getSession();
-        if (authSession?.user) {
-          setEmail(authSession.user.email || "");
-          // Use email as username if no metadata exists
-          const displayName = authSession.user.user_metadata?.name || 
-                             authSession.user.user_metadata?.full_name || 
-                             authSession.user.email?.split('@')[0] || "";
-          setUsername(displayName);
-        }
-      } catch (error) {
-        console.error("Error getting user data:", error);
-      }
+    if (open && user) {
+      setEmail(user.email || "");
+      const displayName = user.user_metadata?.name || 
+                         user.user_metadata?.full_name || 
+                         user.email?.split('@')[0] || "";
+      setUsername(displayName);
     }
-
-    if (open) {
-      getUserData();
-    }
-  }, [open]);
+  }, [open, user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!username || !email) {
-      toast({
-        title: "Missing information",
-        description: "Please enter your name and email",
-        variant: "destructive"
-      });
+      toast.error("Please enter your name and email");
       return;
     }
 
     if (!email.includes('@')) {
-      toast({
-        title: "Invalid email",
-        description: "Please enter a valid email address",
-        variant: "destructive"
-      });
+      toast.error("Please enter a valid email address");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      // Join the session with the user's data from session
       onJoin(username, email);
       onClose();
+      toast.success("Joining session...");
     } catch (error) {
       console.error("Error joining session:", error);
-      toast({
-        title: "Error",
-        description: "Failed to join session. Please try again.",
-        variant: "destructive"
-      });
+      toast.error("Failed to join session. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -130,13 +106,8 @@ const JoinSessionModal = ({
                 className="col-span-3 bg-black/60 border-white/20"
                 placeholder="your.email@example.com"
                 required
-                readOnly={!!email}
+                readOnly={!!user}
               />
-              {email && (
-                <p className="text-xs text-gray-400 col-span-3 col-start-2">
-                  Using email from your account
-                </p>
-              )}
             </div>
           </div>
           <DialogFooter>

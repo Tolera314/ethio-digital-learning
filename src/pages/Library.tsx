@@ -1,10 +1,11 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Book, BookOpen, Users } from "lucide-react";
+import { Search, Book, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import PageLayout from "@/components/PageLayout";
 import BookCard from "@/components/library/BookCard";
@@ -21,7 +22,7 @@ const Library = () => {
   const navigate = useNavigate();
 
   const { data: books, isLoading } = useQuery({
-    queryKey: ["books", searchQuery, tab],
+    queryKey: ["books", searchQuery, tab, user?.id],
     queryFn: async () => {
       let query = supabase.from("books").select("*");
       
@@ -34,18 +35,18 @@ const Library = () => {
       
       if (tab === "all" || !user) {
         return data as BookType[];
-      } else {
-        // Filter for my books if tab is "my-books"
-        const { data: userBooks, error: userBooksError } = await supabase
-          .from("user_books")
-          .select("book_id")
-          .eq("user_id", user.id);
-          
-        if (userBooksError) throw userBooksError;
-        
-        const bookIds = userBooks.map(item => item.book_id);
-        return data.filter(book => bookIds.includes(book.id)) as BookType[];
       }
+      
+      // Get user's books
+      const { data: userBooks, error: userBooksError } = await supabase
+        .from("user_books")
+        .select("book_id")
+        .eq("user_id", user.id);
+        
+      if (userBooksError) throw userBooksError;
+      
+      const bookIds = userBooks.map(item => item.book_id);
+      return data.filter(book => bookIds.includes(book.id)) as BookType[];
     },
   });
   
@@ -53,20 +54,19 @@ const Library = () => {
     queryKey: ["active-sessions"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("reading_sessions" as any)
+        .from("reading_sessions")
         .select("*")
         .eq("is_active", true)
         .order("created_at", { ascending: false })
-        .limit(5);
+        .limit(3);
         
       if (error) throw error;
-      return data as unknown as ReadingSession[];
+      return data as ReadingSession[];
     },
   });
   
   const { data: activeBooks } = useQuery({
-    queryKey: ["active-session-books", activeSessions?.map(s => s.book_id).join("-")],
-    enabled: !!activeSessions && activeSessions.length > 0,
+    queryKey: ["active-session-books"],
     queryFn: async () => {
       if (!activeSessions || activeSessions.length === 0) return [];
       
@@ -80,6 +80,7 @@ const Library = () => {
       if (error) throw error;
       return data as BookType[];
     },
+    enabled: !!activeSessions && activeSessions.length > 0,
   });
   
   const handleJoinSession = (sessionId: string, bookId: string) => {
@@ -107,19 +108,10 @@ const Library = () => {
                 <h2 className="text-2xl font-bold text-white">Active Reading Groups</h2>
                 <p className="text-gray-400">Join others currently reading and discussing these books</p>
               </div>
-              {activeSessions.length > 5 && (
-                <Button 
-                  variant="link" 
-                  className="text-purple-400 hover:text-purple-300"
-                  onClick={() => navigate("/reading-sessions")}
-                >
-                  View all groups
-                </Button>
-              )}
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {activeSessions.slice(0, 3).map((session) => {
+              {activeSessions.map((session) => {
                 const book = activeBooks.find(b => b.id === session.book_id);
                 if (!book) return null;
                 

@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from "react";
-import { Mail, Lock, Eye, EyeOff, UserPlus, LogIn, User, Github, Apple } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, UserPlus, LogIn, User, Github, Apple, Sparkles, Shield, Heart } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -284,154 +283,168 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col md:flex-row items-center justify-center relative overflow-hidden">
-      {/* Full-Page Background Image */}
+    <div className="min-h-screen w-full flex flex-col md:flex-row items-center justify-center relative overflow-hidden bg-slate-950">
+      {/* Enhanced Background */}
       <div className="absolute inset-0 w-full h-full -z-10">
-        <img
-          src={bgImage}
-          alt="Students learning together"
-          className="w-full h-full object-cover object-center brightness-60 saturate-115"
-        />
-        <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/70 to-vivid-purple/70"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.3),transparent_50%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(120,119,198,0.2),transparent_50%)]"></div>
       </div>
 
-      {/* Animated Accent Elements */}
-      <div className="absolute top-8 left-[-80px] w-[260px] h-[260px] rounded-full bg-magenta-pink/20 blur-3xl pointer-events-none animate-[pulse_4s_infinite] z-0"></div>
-      <div className="absolute bottom-[-70px] right-[-60px] w-[300px] h-[300px] rounded-full bg-vivid-purple/30 blur-3xl pointer-events-none animate-[pulse_6s_infinite] z-0"></div>
+      {/* Floating Elements */}
+      <div className="absolute top-1/4 left-[10%] w-2 h-2 bg-purple-400 rounded-full animate-pulse opacity-60"></div>
+      <div className="absolute top-1/3 right-[15%] w-1 h-1 bg-blue-400 rounded-full animate-pulse opacity-40 delay-1000"></div>
+      <div className="absolute bottom-1/4 left-[20%] w-1.5 h-1.5 bg-pink-400 rounded-full animate-pulse opacity-50 delay-500"></div>
 
       {/* Auth Card Section */}
-      <div className="w-full md:w-[480px] z-10 flex justify-center items-center px-4 py-10 md:p-12 animate-scale-in">
-        <Card
-          className={cn(
-            "glass-morphism w-full shadow-2xl px-8 py-10 md:px-12 border-0 bg-black/60 backdrop-blur-3xl relative animate-fade-in",
-            "rounded-3xl border border-white/10 transform transition-all duration-500 ease-out"
-          )}
-        >
+      <div className="w-full md:w-[500px] z-10 flex justify-center items-center px-4 py-8 md:p-12">
+        <Card className="glass-morphism w-full shadow-2xl px-8 py-10 md:px-12 border-0 bg-white/5 backdrop-blur-3xl relative rounded-3xl border border-white/10">
           {verificationSent ? (
             <div className="text-center animate-fade-in">
-              <div className="mb-6 flex justify-center">
-                <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center animate-scale-in">
-                  <Mail className="text-green-400" size={32} />
+              <div className="mb-8 flex justify-center">
+                <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center animate-scale-in shadow-lg shadow-green-500/25">
+                  <Mail className="text-white" size={32} />
                 </div>
               </div>
-              <div className="space-y-4 animate-fade-in delay-200">
-                <h2 className="text-xl font-bold text-white">Verification Email Sent!</h2>
-                <p className="text-gray-300">
-                  We've sent a verification link to <span className="font-semibold text-purple-300">{formData.email}</span>. 
-                  Please check your inbox and click the link to complete your registration.
+              <div className="space-y-6 animate-fade-in delay-200">
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-bold text-white">Check Your Email!</h2>
+                  <div className="w-16 h-1 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full mx-auto"></div>
+                </div>
+                <p className="text-gray-300 leading-relaxed">
+                  We've sent a verification link to <br/>
+                  <span className="font-semibold text-purple-300 bg-purple-500/10 px-2 py-1 rounded-md">{formData.email}</span>
                 </p>
                 <p className="text-gray-400 text-sm">
-                  If you don't see the email, check your spam folder or try again in a few minutes.
+                  Please check your inbox and click the link to complete your registration.
                 </p>
                 <Button
                   onClick={() => setVerificationSent(false)}
-                  className="bg-gradient-to-r from-purple-500 to-blue-600 hover:opacity-90 transition-all duration-300 transform hover:scale-105"
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-purple-500/25 h-12"
                 >
+                  <LogIn size={18} className="mr-2" />
                   Return to Login
                 </Button>
               </div>
             </div>
           ) : (
             <>
-              {/* Tab Toggle with Enhanced Animation */}
-              <div className="flex justify-center mb-8 bg-black/30 rounded-full p-1.5 backdrop-blur-sm">
+              {/* Enhanced Header */}
+              <div className="text-center mb-8 animate-fade-in">
+                <div className="flex justify-center mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/25">
+                    <Sparkles className="text-white" size={24} />
+                  </div>
+                </div>
+                <h1 className="text-3xl font-bold text-white mb-2">
+                  {isSignUp ? "Join Us Today" : "Welcome Back"}
+                </h1>
+                <p className="text-gray-400">
+                  {isSignUp ? "Create your account to get started" : "Sign in to continue your journey"}
+                </p>
+                <div className="w-20 h-1 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full mx-auto mt-3"></div>
+              </div>
+
+              {/* Enhanced Tab Toggle */}
+              <div className="flex justify-center mb-8 bg-black/20 rounded-2xl p-1.5 backdrop-blur-sm border border-white/5">
                 <button
                   className={cn(
-                    "w-1/2 py-3 text-base font-semibold rounded-full focus:outline-none transition-all duration-500 ease-out flex items-center justify-center gap-2 transform relative overflow-hidden",
+                    "w-1/2 py-3.5 text-sm font-semibold rounded-xl focus:outline-none transition-all duration-500 ease-out flex items-center justify-center gap-2 transform relative overflow-hidden group",
                     !isSignUp
-                      ? "bg-gradient-to-r from-vivid-purple to-magenta-pink text-white shadow-lg scale-105 shadow-purple-500/25"
+                      ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg scale-105 shadow-purple-500/25"
                       : "bg-transparent text-gray-400 hover:text-gray-200 hover:bg-white/5"
                   )}
                   onClick={() => handleToggleForm(false)}
-                  aria-label="Sign In"
                 >
-                  <LogIn size={18} className={cn("transition-all duration-300", !isSignUp ? "animate-pulse" : "")} />
-                  Sign In
+                  <div className={cn("absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300", !isSignUp && "opacity-0")}></div>
+                  <LogIn size={18} className={cn("transition-all duration-300 relative z-10", !isSignUp ? "animate-pulse" : "")} />
+                  <span className="relative z-10">Sign In</span>
                 </button>
                 <button
                   className={cn(
-                    "w-1/2 py-3 text-base font-semibold rounded-full focus:outline-none transition-all duration-500 ease-out flex items-center justify-center gap-2 transform relative overflow-hidden",
+                    "w-1/2 py-3.5 text-sm font-semibold rounded-xl focus:outline-none transition-all duration-500 ease-out flex items-center justify-center gap-2 transform relative overflow-hidden group",
                     isSignUp
-                      ? "bg-gradient-to-r from-magenta-pink to-vivid-purple text-white shadow-lg scale-105 shadow-pink-500/25"
+                      ? "bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-lg scale-105 shadow-pink-500/25"
                       : "bg-transparent text-gray-400 hover:text-gray-200 hover:bg-white/5"
                   )}
                   onClick={() => handleToggleForm(true)}
-                  aria-label="Sign Up"
                 >
-                  <UserPlus size={18} className={cn("transition-all duration-300", isSignUp ? "animate-pulse" : "")} />
-                  Sign Up
+                  <div className={cn("absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300", isSignUp && "opacity-0")}></div>
+                  <UserPlus size={18} className={cn("transition-all duration-300 relative z-10", isSignUp ? "animate-pulse" : "")} />
+                  <span className="relative z-10">Sign Up</span>
                 </button>
               </div>
 
-              <div className="relative overflow-hidden min-h-[450px]">
+              <div className="relative overflow-hidden min-h-[500px]">
                 {/* Sign In Form */}
                 <form
                   className={cn(
-                    "flex flex-col justify-center gap-5 absolute inset-0 transition-all duration-700 ease-in-out transform",
+                    "flex flex-col justify-center gap-6 absolute inset-0 transition-all duration-700 ease-in-out transform",
                     !isSignUp && !isTransitioning
                       ? "opacity-100 translate-x-0 pointer-events-auto"
                       : "opacity-0 -translate-x-full pointer-events-none"
                   )}
                   onSubmit={handleSignIn}
-                  autoComplete="off"
                 >
-                  <div className="text-center mb-4 animate-fade-in">
-                    <h2 className="text-2xl font-bold text-white mb-2">Welcome Back!</h2>
-                    <p className="text-gray-400 text-sm">Sign in to access your account</p>
-                  </div>
-                  
                   <div className="space-y-5">
-                    <label className="relative group">
-                      <span className="sr-only">Email</span>
-                      <Mail className="absolute left-3 top-3.5 text-vivid-purple group-focus-within:text-magenta-pink transition-all duration-300 group-focus-within:scale-110" size={18} />
-                      <Input
-                        autoFocus={!isSignUp}
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        placeholder="Email"
-                        className="pl-10 bg-black/30 border-white/10 text-white placeholder-gray-400 h-12 focus:border-magenta-pink focus:shadow-lg focus:shadow-magenta-pink/20 transition-all duration-300 hover:bg-black/40"
-                        required
-                      />
-                    </label>
+                    <div className="space-y-2">
+                      <Label className="text-gray-300 font-medium flex items-center gap-2">
+                        <Mail size={16} className="text-purple-400" />
+                        Email Address
+                      </Label>
+                      <div className="relative group">
+                        <Input
+                          autoFocus={!isSignUp}
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          placeholder="Enter your email"
+                          className="bg-black/20 border-white/10 text-white placeholder-gray-500 h-12 rounded-xl focus:border-purple-400 focus:shadow-lg focus:shadow-purple-400/20 transition-all duration-300 hover:bg-black/30 group-hover:border-white/20"
+                          required
+                        />
+                      </div>
+                    </div>
                     
-                    <label className="relative group">
-                      <span className="sr-only">Password</span>
-                      <Lock className="absolute left-3 top-3.5 text-vivid-purple group-focus-within:text-magenta-pink transition-all duration-300 group-focus-within:scale-110" size={18} />
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        placeholder="Password"
-                        className="pl-10 pr-10 bg-black/30 border-white/10 text-white placeholder-gray-400 h-12 focus:border-magenta-pink focus:shadow-lg focus:shadow-magenta-pink/20 transition-all duration-300 hover:bg-black/40"
-                        required
-                      />
-                      <button
-                        type="button"
-                        className="absolute right-3 top-3 text-gray-400 hover:text-gray-200 transition-all duration-300 hover:scale-110"
-                        tabIndex={-1}
-                        onClick={() => setShowPassword(v => !v)}
-                      >
-                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                      </button>
-                    </label>
+                    <div className="space-y-2">
+                      <Label className="text-gray-300 font-medium flex items-center gap-2">
+                        <Lock size={16} className="text-purple-400" />
+                        Password
+                      </Label>
+                      <div className="relative group">
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          name="password"
+                          value={formData.password}
+                          onChange={handleChange}
+                          placeholder="Enter your password"
+                          className="bg-black/20 border-white/10 text-white placeholder-gray-500 h-12 rounded-xl pr-12 focus:border-purple-400 focus:shadow-lg focus:shadow-purple-400/20 transition-all duration-300 hover:bg-black/30 group-hover:border-white/20"
+                          required
+                        />
+                        <button
+                          type="button"
+                          className="absolute right-3 top-3 text-gray-400 hover:text-gray-200 transition-all duration-300 hover:scale-110 p-1 rounded-lg hover:bg-white/5"
+                          onClick={() => setShowPassword(v => !v)}
+                        >
+                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                   
-                  <div className="flex justify-between items-center text-sm">
-                    <div className="flex items-center space-x-2">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-3">
                       <Checkbox 
                         id="remember" 
                         checked={formData.remember}
                         onCheckedChange={handleCheckboxChange}
-                        className="data-[state=checked]:bg-magenta-pink data-[state=checked]:border-magenta-pink transition-all duration-300"
+                        className="data-[state=checked]:bg-purple-500 data-[state=checked]:border-purple-500 border-white/20 rounded-md"
                       />
-                      <Label htmlFor="remember" className="text-gray-300 text-sm">Remember me</Label>
+                      <Label htmlFor="remember" className="text-gray-300 text-sm cursor-pointer">Remember me</Label>
                     </div>
                     <button
                       type="button"
-                      className="text-magenta-pink hover:text-vivid-purple hover:underline transition-all duration-300 transform hover:scale-105"
+                      className="text-purple-400 hover:text-purple-300 hover:underline transition-all duration-300 text-sm font-medium"
                     >
                       Forgot password?
                     </button>
@@ -439,10 +452,7 @@ const Auth = () => {
                   
                   <Button
                     type="submit"
-                    className={cn(
-                      "bg-gradient-to-r from-vivid-purple via-magenta-pink to-vivid-purple bg-size-200 hover:bg-right-bottom text-white py-3 px-6 mt-4 rounded-xl text-base font-semibold shadow-lg transition-all duration-500 drop-shadow-glow hover:scale-105 hover:shadow-xl hover:shadow-purple-500/25",
-                      "focus:ring focus:ring-magenta-pink/40 h-12 transform active:scale-95"
-                    )}
+                    className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 bg-size-200 hover:bg-right-bottom text-white py-3.5 px-6 rounded-xl text-base font-semibold shadow-lg transition-all duration-500 transform hover:scale-105 hover:shadow-xl hover:shadow-purple-500/25 h-12"
                     disabled={loading}
                   >
                     {loading ? (
@@ -458,54 +468,55 @@ const Auth = () => {
                     )}
                   </Button>
                   
-                  <div className="relative flex items-center justify-center mt-6 mb-6">
-                    <hr className="w-full border-white/10" />
-                    <span className="absolute bg-black/60 px-3 text-gray-400 text-sm backdrop-blur-sm">or continue with</span>
+                  <div className="relative flex items-center justify-center my-6">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-white/10"></div>
+                    </div>
+                    <div className="relative bg-slate-950 px-4">
+                      <span className="text-gray-400 text-sm font-medium">or continue with</span>
+                    </div>
                   </div>
                   
-                  <div className="flex gap-3 justify-center">
+                  <div className="grid grid-cols-3 gap-3">
                     <Button 
                       type="button"
                       onClick={() => handleSocialAuth('google')}
                       disabled={loading}
                       variant="outline" 
-                      className="flex-1 bg-black/20 border-white/10 hover:bg-black/40 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                      className="bg-black/20 border-white/10 hover:bg-black/40 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:border-white/20 h-12 rounded-xl group"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                         <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                         <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                       </svg>
-                      Google
                     </Button>
                     <Button 
                       type="button"
                       onClick={() => handleSocialAuth('github')}
                       disabled={loading}
                       variant="outline" 
-                      className="flex-1 bg-black/20 border-white/10 hover:bg-black/40 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                      className="bg-black/20 border-white/10 hover:bg-black/40 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:border-white/20 h-12 rounded-xl group"
                     >
-                      <Github className="h-5 w-5 mr-2" />
-                      GitHub
+                      <Github className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
                     </Button>
                     <Button 
                       type="button"
                       onClick={() => handleSocialAuth('apple')}
                       disabled={loading}
                       variant="outline" 
-                      className="flex-1 bg-black/20 border-white/10 hover:bg-black/40 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                      className="bg-black/20 border-white/10 hover:bg-black/40 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:border-white/20 h-12 rounded-xl group"
                     >
-                      <Apple className="h-5 w-5 mr-2" />
-                      Apple
+                      <Apple className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
                     </Button>
                   </div>
                   
-                  <div className="mt-6 text-sm text-center text-gray-400">
-                    New here?{" "}
+                  <div className="text-center text-sm text-gray-400">
+                    New to our platform?{" "}
                     <button
                       type="button"
-                      className="text-magenta-pink font-bold hover:underline transition-all duration-300 transform hover:scale-105"
+                      className="text-purple-400 font-semibold hover:text-purple-300 hover:underline transition-all duration-300"
                       onClick={() => handleToggleForm(true)}
                     >
                       Create an account
@@ -516,92 +527,98 @@ const Auth = () => {
                 {/* Sign Up Form */}
                 <form
                   className={cn(
-                    "flex flex-col justify-center gap-5 absolute inset-0 transition-all duration-700 ease-in-out transform",
+                    "flex flex-col justify-center gap-6 absolute inset-0 transition-all duration-700 ease-in-out transform",
                     isSignUp && !isTransitioning
                       ? "opacity-100 translate-x-0 pointer-events-auto"
                       : "opacity-0 translate-x-full pointer-events-none"
                   )}
                   onSubmit={handleSignUp}
-                  autoComplete="off"
                 >
-                  <div className="text-center mb-4 animate-fade-in">
-                    <h2 className="text-2xl font-bold text-white mb-2">Join Us Today!</h2>
-                    <p className="text-gray-400 text-sm">Create your account to get started</p>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <label className="relative group">
-                      <span className="sr-only">Name</span>
-                      <User className="absolute left-3 top-3.5 text-vivid-purple group-focus-within:text-magenta-pink transition-all duration-300 group-focus-within:scale-110" size={18} />
-                      <Input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        placeholder="Full Name"
-                        className="pl-10 bg-black/30 border-white/10 text-white placeholder-gray-400 h-12 focus:border-magenta-pink focus:shadow-lg focus:shadow-magenta-pink/20 transition-all duration-300 hover:bg-black/40"
-                        required
-                        autoFocus={isSignUp}
-                      />
-                    </label>
+                  <div className="space-y-5">
+                    <div className="space-y-2">
+                      <Label className="text-gray-300 font-medium flex items-center gap-2">
+                        <User size={16} className="text-pink-400" />
+                        Full Name
+                      </Label>
+                      <div className="relative group">
+                        <Input
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          placeholder="Enter your full name"
+                          className="bg-black/20 border-white/10 text-white placeholder-gray-500 h-12 rounded-xl focus:border-pink-400 focus:shadow-lg focus:shadow-pink-400/20 transition-all duration-300 hover:bg-black/30 group-hover:border-white/20"
+                          required
+                          autoFocus={isSignUp}
+                        />
+                      </div>
+                    </div>
                     
-                    <label className="relative group">
-                      <span className="sr-only">Email</span>
-                      <Mail className="absolute left-3 top-3.5 text-vivid-purple group-focus-within:text-magenta-pink transition-all duration-300 group-focus-within:scale-110" size={18} />
-                      <Input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        placeholder="Email"
-                        className="pl-10 bg-black/30 border-white/10 text-white placeholder-gray-400 h-12 focus:border-magenta-pink focus:shadow-lg focus:shadow-magenta-pink/20 transition-all duration-300 hover:bg-black/40"
-                        required
-                      />
-                    </label>
+                    <div className="space-y-2">
+                      <Label className="text-gray-300 font-medium flex items-center gap-2">
+                        <Mail size={16} className="text-pink-400" />
+                        Email Address
+                      </Label>
+                      <div className="relative group">
+                        <Input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          placeholder="Enter your email"
+                          className="bg-black/20 border-white/10 text-white placeholder-gray-500 h-12 rounded-xl focus:border-pink-400 focus:shadow-lg focus:shadow-pink-400/20 transition-all duration-300 hover:bg-black/30 group-hover:border-white/20"
+                          required
+                        />
+                      </div>
+                    </div>
                     
-                    <label className="relative group">
-                      <span className="sr-only">Password</span>
-                      <Lock className="absolute left-3 top-3.5 text-vivid-purple group-focus-within:text-magenta-pink transition-all duration-300 group-focus-within:scale-110" size={18} />
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        placeholder="Password"
-                        className="pl-10 pr-10 bg-black/30 border-white/10 text-white placeholder-gray-400 h-12 focus:border-magenta-pink focus:shadow-lg focus:shadow-magenta-pink/20 transition-all duration-300 hover:bg-black/40"
-                        required
-                      />
-                      <button
-                        type="button"
-                        className="absolute right-3 top-3 text-gray-400 hover:text-gray-200 transition-all duration-300 hover:scale-110"
-                        tabIndex={-1}
-                        onClick={() => setShowPassword(v => !v)}
-                      >
-                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                      </button>
-                    </label>
+                    <div className="space-y-2">
+                      <Label className="text-gray-300 font-medium flex items-center gap-2">
+                        <Lock size={16} className="text-pink-400" />
+                        Password
+                      </Label>
+                      <div className="relative group">
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          name="password"
+                          value={formData.password}
+                          onChange={handleChange}
+                          placeholder="Create a strong password"
+                          className="bg-black/20 border-white/10 text-white placeholder-gray-500 h-12 rounded-xl pr-12 focus:border-pink-400 focus:shadow-lg focus:shadow-pink-400/20 transition-all duration-300 hover:bg-black/30 group-hover:border-white/20"
+                          required
+                        />
+                        <button
+                          type="button"
+                          className="absolute right-3 top-3 text-gray-400 hover:text-gray-200 transition-all duration-300 hover:scale-110 p-1 rounded-lg hover:bg-white/5"
+                          onClick={() => setShowPassword(v => !v)}
+                        >
+                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
+                    </div>
                     
-                    <label className="relative group">
-                      <span className="sr-only">Confirm Password</span>
-                      <Lock className="absolute left-3 top-3.5 text-vivid-purple group-focus-within:text-magenta-pink transition-all duration-300 group-focus-within:scale-110" size={18} />
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        name="confirmPassword"
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                        placeholder="Confirm Password"
-                        className="pl-10 pr-10 bg-black/30 border-white/10 text-white placeholder-gray-400 h-12 focus:border-magenta-pink focus:shadow-lg focus:shadow-magenta-pink/20 transition-all duration-300 hover:bg-black/40"
-                        required
-                      />
-                    </label>
+                    <div className="space-y-2">
+                      <Label className="text-gray-300 font-medium flex items-center gap-2">
+                        <Shield size={16} className="text-pink-400" />
+                        Confirm Password
+                      </Label>
+                      <div className="relative group">
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          name="confirmPassword"
+                          value={formData.confirmPassword}
+                          onChange={handleChange}
+                          placeholder="Confirm your password"
+                          className="bg-black/20 border-white/10 text-white placeholder-gray-500 h-12 rounded-xl focus:border-pink-400 focus:shadow-lg focus:shadow-pink-400/20 transition-all duration-300 hover:bg-black/30 group-hover:border-white/20"
+                          required
+                        />
+                      </div>
+                    </div>
                   </div>
                   
                   <Button
                     type="submit"
-                    className={cn(
-                      "bg-gradient-to-r from-magenta-pink via-vivid-purple to-magenta-pink bg-size-200 hover:bg-right-bottom text-white py-3 px-6 mt-4 rounded-xl text-base font-semibold shadow-lg transition-all duration-500 drop-shadow-glow hover:scale-105 hover:shadow-xl hover:shadow-pink-500/25",
-                      "focus:ring focus:ring-vivid-purple/30 h-12 transform active:scale-95"
-                    )}
+                    className="bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 bg-size-200 hover:bg-right-bottom text-white py-3.5 px-6 rounded-xl text-base font-semibold shadow-lg transition-all duration-500 transform hover:scale-105 hover:shadow-xl hover:shadow-pink-500/25 h-12"
                     disabled={loading}
                   >
                     {loading ? (
@@ -612,62 +629,63 @@ const Auth = () => {
                     ) : (
                       <>
                         <UserPlus size={18} className="mr-2" />
-                        Sign Up
+                        Create Account
                       </>
                     )}
                   </Button>
                   
-                  <div className="relative flex items-center justify-center mt-6 mb-6">
-                    <hr className="w-full border-white/10" />
-                    <span className="absolute bg-black/60 px-3 text-gray-400 text-sm backdrop-blur-sm">or sign up with</span>
+                  <div className="relative flex items-center justify-center my-6">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-white/10"></div>
+                    </div>
+                    <div className="relative bg-slate-950 px-4">
+                      <span className="text-gray-400 text-sm font-medium">or sign up with</span>
+                    </div>
                   </div>
                   
-                  <div className="flex gap-3 justify-center">
+                  <div className="grid grid-cols-3 gap-3">
                     <Button 
                       type="button"
                       onClick={() => handleSocialAuth('google')}
                       disabled={loading}
                       variant="outline" 
-                      className="flex-1 bg-black/20 border-white/10 hover:bg-black/40 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                      className="bg-black/20 border-white/10 hover:bg-black/40 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:border-white/20 h-12 rounded-xl group"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                         <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                         <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                       </svg>
-                      Google
                     </Button>
                     <Button 
                       type="button"
                       onClick={() => handleSocialAuth('github')}
                       disabled={loading}
                       variant="outline" 
-                      className="flex-1 bg-black/20 border-white/10 hover:bg-black/40 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                      className="bg-black/20 border-white/10 hover:bg-black/40 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:border-white/20 h-12 rounded-xl group"
                     >
-                      <Github className="h-5 w-5 mr-2" />
-                      GitHub
+                      <Github className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
                     </Button>
                     <Button 
                       type="button"
                       onClick={() => handleSocialAuth('apple')}
                       disabled={loading}
                       variant="outline" 
-                      className="flex-1 bg-black/20 border-white/10 hover:bg-black/40 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                      className="bg-black/20 border-white/10 hover:bg-black/40 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:border-white/20 h-12 rounded-xl group"
                     >
-                      <Apple className="h-5 w-5 mr-2" />
-                      Apple
+                      <Apple className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
                     </Button>
                   </div>
                   
-                  <div className="mt-6 text-sm text-center text-gray-400">
+                  <div className="text-center text-sm text-gray-400">
                     Already have an account?{" "}
                     <button
                       type="button"
-                      className="text-magenta-pink font-bold hover:underline transition-all duration-300 transform hover:scale-105"
+                      className="text-pink-400 font-semibold hover:text-pink-300 hover:underline transition-all duration-300"
                       onClick={() => handleToggleForm(false)}
                     >
-                      Sign In
+                      Sign in here
                     </button>
                   </div>
                 </form>
@@ -675,19 +693,23 @@ const Auth = () => {
             </>
           )}
           
-          {/* Inspirational Quote */}
-          <div className="mt-8 text-center text-md italic font-semibold text-white/90 animate-fade-in delay-300">
-            <span className="block bg-gradient-to-r from-magenta-pink via-vivid-purple to-blue-400 bg-clip-text text-transparent">
-              "Unlock a world of knowledge. Dream. Learn. Achieve."
-            </span>
+          {/* Enhanced Inspirational Quote */}
+          <div className="mt-8 text-center animate-fade-in delay-300">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Heart className="text-pink-400" size={16} />
+              <span className="text-sm font-medium bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
+                "Unlock a world of knowledge. Dream. Learn. Achieve."
+              </span>
+              <Heart className="text-pink-400" size={16} />
+            </div>
           </div>
           
           {/* Back to Home */}
           <Link
             to="/"
-            className="block mt-5 text-xs text-gray-400 hover:text-vivid-purple hover:underline transition-all duration-300 text-center transform hover:scale-105"
+            className="block mt-6 text-sm text-gray-400 hover:text-purple-400 hover:underline transition-all duration-300 text-center transform hover:scale-105 font-medium"
           >
-            &larr; Back to Home
+            ← Back to Home
           </Link>
         </Card>
       </div>

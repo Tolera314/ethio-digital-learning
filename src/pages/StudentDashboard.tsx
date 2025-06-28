@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Bell, Users, Video } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
@@ -8,8 +9,9 @@ import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { CourseProgressCard } from "@/components/dashboard/CourseProgressList";
 import { RecentActivitiesCard } from "@/components/dashboard/RecentActivities";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { logActivity } from "@/utils/activityLogger";
+import { logActivity, getUserActivitySummary } from "@/utils/activityLogger";
 import { useNavigate } from "react-router-dom";
+import { DynamicRecommendations } from "@/components/DynamicRecommendations";
 
 const StudentDashboard = () => {
   const { user } = useAuth();
@@ -20,6 +22,40 @@ const StudentDashboard = () => {
     loading 
   } = useUserActivities();
   
+  const [activitySummary, setActivitySummary] = useState({
+    totalLearningTime: 0,
+    enrolledCourses: 0,
+    totalCertificates: 0,
+    totalBooks: 0
+  });
+
+  const [upcomingSessions, setUpcomingSessions] = useState([
+    {
+      id: 1,
+      title: "Advanced React Hooks",
+      time: "14:00 - 16:00 EAT",
+      participants: 76,
+      status: "today",
+      isLive: false
+    },
+    {
+      id: 2,
+      title: "UX Research Methods",
+      time: "10:00 - 12:00 EAT",
+      participants: 42,
+      status: "3 days",
+      isLive: false
+    },
+    {
+      id: 3,
+      title: "Intro to AI - LIVE NOW",
+      time: "15:00 - 17:00 EAT",
+      participants: 104,
+      status: "live",
+      isLive: true
+    }
+  ]);
+  
   useEffect(() => {
     // If not authenticated, redirect to login
     if (!user && !loading) {
@@ -29,16 +65,43 @@ const StudentDashboard = () => {
     
     // Log this dashboard view as an activity
     if (user) {
-      // Use setTimeout to prevent potential auth deadlock
       setTimeout(() => {
         logActivity('login');
       }, 0);
     }
   }, [user, loading, navigate]);
 
+  useEffect(() => {
+    const loadActivitySummary = async () => {
+      if (user && !loading) {
+        const summary = await getUserActivitySummary();
+        setActivitySummary(summary);
+      }
+    };
+    
+    loadActivitySummary();
+  }, [user, loading]);
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    const name = user?.user_metadata?.name || user?.email?.split('@')[0] || 'Student';
+    
+    if (hour < 12) return `Good morning, ${name}!`;
+    if (hour < 18) return `Good afternoon, ${name}!`;
+    return `Good evening, ${name}!`;
+  };
+
+  const getSessionStatusColor = (status) => {
+    switch (status) {
+      case 'live': return 'bg-red-900/50 text-red-200 animate-pulse';
+      case 'today': return 'bg-orange-900/50 text-orange-200';
+      default: return 'bg-purple-900/50 text-purple-200';
+    }
+  };
+
   return (
     <PageLayout 
-      title="Student Dashboard" 
+      title={user ? getGreeting() : "Student Dashboard"}
       subtitle="Your personal learning hub"
       backgroundImage="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=1200&q=80"
     >
@@ -61,42 +124,37 @@ const StudentDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="p-3 bg-black/30 rounded-lg border border-white/5 hover:border-purple-500/30 transition-all">
-                  <div className="flex justify-between items-start">
-                    <h4 className="font-medium text-white">Advanced React Hooks</h4>
-                    <span className="text-xs bg-red-900/50 text-red-200 px-2 py-0.5 rounded">Today</span>
+                {upcomingSessions.map((session) => (
+                  <div 
+                    key={session.id}
+                    className={`p-3 bg-black/30 rounded-lg border border-white/5 hover:border-purple-500/30 transition-all cursor-pointer ${
+                      session.isLive ? 'ring-2 ring-red-500/50' : ''
+                    }`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-medium text-white">{session.title}</h4>
+                      <span className={`text-xs px-2 py-0.5 rounded ${getSessionStatusColor(session.status)}`}>
+                        {session.status === 'live' ? 'LIVE' : session.status}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-400 mt-1">{session.time}</p>
+                    <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                      <Users size={12} /> 
+                      <span>{session.participants} participants</span>
+                      {session.isLive && (
+                        <span className="text-red-400 font-medium">• Join Now!</span>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-sm text-gray-400 mt-1">14:00 - 16:00 EAT</p>
-                  <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
-                    <Users size={12} /> <span>76 participants</span>
-                  </div>
-                </div>
-
-                <div className="p-3 bg-black/30 rounded-lg border border-white/5 hover:border-purple-500/30 transition-all">
-                  <div className="flex justify-between items-start">
-                    <h4 className="font-medium text-white">UX Research Methods</h4>
-                    <span className="text-xs bg-purple-900/50 text-purple-200 px-2 py-0.5 rounded">3 days</span>
-                  </div>
-                  <p className="text-sm text-gray-400 mt-1">10:00 - 12:00 EAT</p>
-                  <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
-                    <Users size={12} /> <span>42 participants</span>
-                  </div>
-                </div>
-
-                <div className="p-3 bg-black/30 rounded-lg border border-white/5 hover:border-purple-500/30 transition-all">
-                  <div className="flex justify-between items-start">
-                    <h4 className="font-medium text-white">Intro to AI</h4>
-                    <span className="text-xs bg-blue-900/50 text-blue-200 px-2 py-0.5 rounded">Next week</span>
-                  </div>
-                  <p className="text-sm text-gray-400 mt-1">15:00 - 17:00 EAT</p>
-                  <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
-                    <Users size={12} /> <span>104 participants</span>
-                  </div>
-                </div>
+                ))}
               </div>
               
               <div className="mt-4">
-                <Button variant="outline" className="w-full border-white/20 hover:bg-white/10">
+                <Button 
+                  variant="outline" 
+                  className="w-full border-white/20 hover:bg-white/10"
+                  onClick={() => navigate('/live-sessions')}
+                >
                   <Video size={16} className="mr-2" /> View All Sessions
                 </Button>
               </div>
@@ -112,68 +170,11 @@ const StudentDashboard = () => {
           limit={3}
         />
         
-        <Card className="bg-black/40 border border-white/10 backdrop-blur-lg">
-          <CardHeader>
-            <CardTitle className="text-xl text-white">Recommended For You</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-start gap-3 p-3 bg-black/30 rounded-lg border border-white/5 hover:border-purple-500/30 transition-all cursor-pointer">
-                <img 
-                  src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80" 
-                  alt="AI and Machine Learning" 
-                  className="w-16 h-16 object-cover rounded-lg"
-                />
-                <div>
-                  <h4 className="font-medium text-white">AI and Machine Learning</h4>
-                  <p className="text-sm text-gray-400">Advance your tech skills</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="text-xs bg-purple-900/50 text-purple-200 px-2 py-0.5 rounded">Advanced</div>
-                    <span className="text-xs text-gray-500">14 weeks</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 p-3 bg-black/30 rounded-lg border border-white/5 hover:border-purple-500/30 transition-all cursor-pointer">
-                <img 
-                  src="https://images.unsplash.com/photo-1605379399642-870262d3d051?auto=format&fit=crop&w=800&q=80" 
-                  alt="Data Science Fundamentals" 
-                  className="w-16 h-16 object-cover rounded-lg"
-                />
-                <div>
-                  <h4 className="font-medium text-white">Data Science Fundamentals</h4>
-                  <p className="text-sm text-gray-400">Learn Python and data analysis</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="text-xs bg-blue-900/50 text-blue-200 px-2 py-0.5 rounded">Beginner</div>
-                    <span className="text-xs text-gray-500">10 weeks</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 p-3 bg-black/30 rounded-lg border border-white/5 hover:border-purple-500/30 transition-all cursor-pointer">
-                <img 
-                  src="https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=800&q=80" 
-                  alt="DevOps Engineering" 
-                  className="w-16 h-16 object-cover rounded-lg"
-                />
-                <div>
-                  <h4 className="font-medium text-white">DevOps Engineering</h4>
-                  <p className="text-sm text-gray-400">Master CI/CD pipelines</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="text-xs bg-green-900/50 text-green-200 px-2 py-0.5 rounded">Intermediate</div>
-                    <span className="text-xs text-gray-500">12 weeks</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="mt-4">
-              <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white">
-                Explore More Courses
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <DynamicRecommendations 
+          activities={recentActivities}
+          activitySummary={activitySummary}
+          isLoading={loading}
+        />
       </div>
     </PageLayout>
   );

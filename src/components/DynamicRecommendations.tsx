@@ -99,10 +99,10 @@ export function DynamicRecommendations({
     return recommendations.slice(0, 3);
   };
   
-  const isRecentActivity = (dateString) => {
+  const isRecentActivity = (dateString: string) => {
     const activityDate = new Date(dateString);
     const now = new Date();
-    const diffTime = Math.abs(now - activityDate);
+    const diffTime = Math.abs(now.getTime() - activityDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays <= 7;
   };

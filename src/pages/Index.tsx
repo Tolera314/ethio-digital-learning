@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -100,7 +99,7 @@ const Index = () => {
     const today = new Date();
     const recentDays = recentActivities.filter(activity => {
       const activityDate = new Date(activity.created_at);
-      const diffTime = Math.abs(today - activityDate);
+      const diffTime = Math.abs(today.getTime() - activityDate.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       return diffDays <= 7;
     });

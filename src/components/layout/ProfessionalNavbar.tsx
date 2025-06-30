@@ -22,12 +22,13 @@ import {
   GraduationCap,
   BarChart3,
   Calendar,
-  Library
+  Library,
+  Shield
 } from 'lucide-react';
 
 const ProfessionalNavbar = () => {
   const { user, signOut } = useAuth();
-  const { role, isAdmin, isInstructor } = useRole();
+  const { role, isAdmin, isInstructor, isSuperAdmin } = useRole();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -43,14 +44,24 @@ const ProfessionalNavbar = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const getRoleDisplayName = (role: string) => {
+    switch (role) {
+      case 'super_admin': return 'Super Admin';
+      case 'admin': return 'Admin';
+      case 'instructor': return 'Instructor';
+      case 'student': return 'Student';
+      default: return role;
+    }
+  };
+
   const navItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: BarChart3, roles: ['student', 'instructor', 'admin'] },
-    { path: '/courses', label: 'Courses', icon: BookOpen, roles: ['student', 'instructor', 'admin'] },
-    { path: '/library', label: 'Library', icon: Library, roles: ['student', 'instructor', 'admin'] },
-    { path: '/live-sessions', label: 'Live Sessions', icon: Calendar, roles: ['student', 'instructor', 'admin'] },
+    { path: '/dashboard', label: 'Dashboard', icon: BarChart3, roles: ['student', 'instructor', 'admin', 'super_admin'] },
+    { path: '/courses', label: 'Courses', icon: BookOpen, roles: ['student', 'instructor', 'admin', 'super_admin'] },
+    { path: '/library', label: 'Library', icon: Library, roles: ['student', 'instructor', 'admin', 'super_admin'] },
+    { path: '/live-sessions', label: 'Live Sessions', icon: Calendar, roles: ['student', 'instructor', 'admin', 'super_admin'] },
     { path: '/progress', label: 'Progress', icon: GraduationCap, roles: ['student'] },
-    { path: '/admin', label: 'Admin Panel', icon: Settings, roles: ['admin'] },
-    { path: '/instructor', label: 'Instructor Panel', icon: Users, roles: ['instructor', 'admin'] },
+    { path: '/admin', label: 'Admin Panel', icon: Settings, roles: ['admin', 'super_admin'] },
+    { path: '/instructor', label: 'Instructor Panel', icon: Users, roles: ['instructor', 'admin', 'super_admin'] },
   ];
 
   const availableNavItems = navItems.filter(item => {
@@ -93,9 +104,12 @@ const ProfessionalNavbar = () => {
 
           {/* User Menu */}
           <div className="flex items-center space-x-4">
-            <div className="hidden md:block">
-              <span className="text-sm font-medium text-gray-700 capitalize">
-                {role}
+            <div className="hidden md:flex items-center space-x-2">
+              {isSuperAdmin() && (
+                <Shield className="h-4 w-4 text-purple-600" />
+              )}
+              <span className="text-sm font-medium text-gray-700">
+                {getRoleDisplayName(role || '')}
               </span>
             </div>
             
@@ -119,8 +133,9 @@ const ProfessionalNavbar = () => {
                     <p className="text-xs leading-none text-muted-foreground">
                       {user?.email}
                     </p>
-                    <p className="text-xs leading-none text-muted-foreground capitalize">
-                      {role}
+                    <p className="text-xs leading-none text-muted-foreground flex items-center">
+                      {isSuperAdmin() && <Shield className="h-3 w-3 mr-1 text-purple-600" />}
+                      {getRoleDisplayName(role || '')}
                     </p>
                   </div>
                 </DropdownMenuLabel>

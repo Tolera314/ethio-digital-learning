@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import ProfessionalNavbar from '@/components/layout/ProfessionalNavbar';
-import { Users, GraduationCap, BookOpen, TrendingUp } from 'lucide-react';
+import { useRole } from '@/hooks/useRole';
+import { Users, GraduationCap, BookOpen, TrendingUp, Shield } from 'lucide-react';
 
 interface UserData {
   id: string;
@@ -20,6 +21,7 @@ interface UserData {
 }
 
 const AdminDashboard = () => {
+  const { isSuperAdmin } = useRole();
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<string>('');
@@ -83,7 +85,7 @@ const AdminDashboard = () => {
     try {
       const { error } = await supabase
         .from('user_roles')
-        .update({ role: newRole as 'admin' | 'instructor' | 'student' })
+        .update({ role: newRole as 'admin' | 'instructor' | 'student' | 'super_admin' })
         .eq('user_id', selectedUser);
 
       if (error) throw error;
@@ -108,10 +110,38 @@ const AdminDashboard = () => {
 
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
-      case 'admin': return 'destructive';
-      case 'instructor': return 'default';
-      case 'student': return 'secondary';
+      case 'super_admin': return 'destructive';
+      case 'admin': return 'default';
+      case 'instructor': return 'secondary';
+      case 'student': return 'outline';
       default: return 'outline';
+    }
+  };
+
+  const getRoleDisplayName = (role: string) => {
+    switch (role) {
+      case 'super_admin': return 'Super Admin';
+      case 'admin': return 'Admin';
+      case 'instructor': return 'Instructor';
+      case 'student': return 'Student';
+      default: return role;
+    }
+  };
+
+  // Filter role options based on current user permissions
+  const getAvailableRoles = () => {
+    if (isSuperAdmin()) {
+      return [
+        { value: 'student', label: 'Student' },
+        { value: 'instructor', label: 'Instructor' },
+        { value: 'admin', label: 'Admin' },
+        { value: 'super_admin', label: 'Super Admin' }
+      ];
+    } else {
+      return [
+        { value: 'student', label: 'Student' },
+        { value: 'instructor', label: 'Instructor' }
+      ];
     }
   };
 
@@ -123,10 +153,16 @@ const AdminDashboard = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
           <p className="text-gray-600 mt-2">Manage users, roles, and platform settings</p>
+          {isSuperAdmin() && (
+            <div className="mt-2 flex items-center text-sm text-purple-600">
+              <Shield className="h-4 w-4 mr-1" />
+              Super Admin Access
+            </div>
+          )}
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -172,6 +208,18 @@ const AdminDashboard = () => {
               </div>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Super Admins</CardTitle>
+              <Shield className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {users.filter(u => u.role === 'super_admin').length}
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -181,6 +229,11 @@ const AdminDashboard = () => {
               <CardTitle>User Role Management</CardTitle>
               <CardDescription>
                 Update user roles and permissions
+                {!isSuperAdmin() && (
+                  <span className="block text-amber-600 text-xs mt-1">
+                    Note: You can only manage Student and Instructor roles
+                  </span>
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -193,7 +246,7 @@ const AdminDashboard = () => {
                   <SelectContent>
                     {users.map((user) => (
                       <SelectItem key={user.id} value={user.id}>
-                        {user.full_name} ({user.email})
+                        {user.full_name} ({user.email}) - {getRoleDisplayName(user.role)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -207,9 +260,11 @@ const AdminDashboard = () => {
                     <SelectValue placeholder="Choose a role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="student">Student</SelectItem>
-                    <SelectItem value="instructor">Instructor</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
+                    {getAvailableRoles().map((role) => (
+                      <SelectItem key={role.value} value={role.value}>
+                        {role.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -240,7 +295,7 @@ const AdminDashboard = () => {
                         <p className="text-sm text-gray-600">{user.email}</p>
                       </div>
                       <Badge variant={getRoleBadgeVariant(user.role)}>
-                        {user.role}
+                        {getRoleDisplayName(user.role)}
                       </Badge>
                     </div>
                   ))}

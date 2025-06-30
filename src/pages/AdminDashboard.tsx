@@ -32,26 +32,26 @@ const AdminDashboard = () => {
 
   const fetchUsers = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: profilesData, error } = await supabase
         .from('profiles')
         .select(`
           id,
           full_name,
-          user_roles!inner(role),
-          created_at
+          created_at,
+          user_roles!inner(role)
         `);
 
       if (error) throw error;
 
-      // Get user emails from auth metadata
+      // Transform the data to get user emails and flatten the role structure
       const usersWithAuth = await Promise.all(
-        data.map(async (profile) => {
+        profilesData.map(async (profile: any) => {
           const { data: authData } = await supabase.auth.admin.getUserById(profile.id);
           return {
             id: profile.id,
             email: authData.user?.email || 'N/A',
             full_name: profile.full_name || 'N/A',
-            role: profile.user_roles[0]?.role || 'student',
+            role: profile.user_roles.role || 'student',
             created_at: profile.created_at
           };
         })
@@ -83,7 +83,7 @@ const AdminDashboard = () => {
     try {
       const { error } = await supabase
         .from('user_roles')
-        .update({ role: newRole })
+        .update({ role: newRole as 'admin' | 'instructor' | 'student' })
         .eq('user_id', selectedUser);
 
       if (error) throw error;

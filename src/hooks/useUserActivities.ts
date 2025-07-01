@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { Json } from '@/integrations/supabase/types';
+import { logDashboardVisit } from '@/utils/activityLogger';
 
 export interface UserActivity {
   id: string;
@@ -17,6 +18,7 @@ export interface CourseProgress {
   courseId: string;
   title: string;
   progress: number;
+  lastAccessed?: string;
 }
 
 export const useUserActivities = () => {
@@ -37,6 +39,9 @@ export const useUserActivities = () => {
       try {
         setLoading(true);
         
+        // Log dashboard visit
+        await logDashboardVisit();
+        
         // Get all user activities
         const { data, error: activitiesError } = await supabase
           .from('user_activities')
@@ -47,11 +52,9 @@ export const useUserActivities = () => {
         if (activitiesError) throw activitiesError;
         
         setActivities(data || []);
-        
-        // Get recent activities (last 10)
         setRecentActivities(data?.slice(0, 10) || []);
         
-        // Get course progress for each unique course
+        // Process course progress
         const courseIds = [...new Set(
           data
             ?.filter(a => a.activity_type === 'course_progress')
@@ -60,26 +63,27 @@ export const useUserActivities = () => {
         
         const coursesProgress: CourseProgress[] = [];
         
-        // For each course, get the latest progress activity
         for (const courseId of courseIds) {
           if (!courseId) continue;
           
-          const latestActivity = data
+          const courseActivities = data
             ?.filter(a => 
               a.activity_type === 'course_progress' && 
               a.resource_id === courseId
             )
             .sort((a, b) => 
               new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-            )[0];
+            ) || [];
             
-          if (latestActivity) {
-            // Safely access metadata properties
+          if (courseActivities.length > 0) {
+            const latestActivity = courseActivities[0];
             const metadata = latestActivity.metadata as any;
+            
             coursesProgress.push({
               courseId,
               title: metadata?.title || 'Untitled Course',
-              progress: metadata?.progress || 0
+              progress: metadata?.progress || 0,
+              lastAccessed: latestActivity.created_at
             });
           }
         }
@@ -97,11 +101,12 @@ export const useUserActivities = () => {
     
     // Subscribe to realtime changes
     const channel = supabase
-      .channel('schema-db-changes')
+      .channel('user-activities-changes')
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
-        table: 'user_activities'
+        table: 'user_activities',
+        filter: `user_id=eq.${user?.id}`
       }, () => {
         fetchActivities();
       })
@@ -112,31 +117,11 @@ export const useUserActivities = () => {
     };
   }, [user]);
 
-  const refreshActivities = async () => {
-    setLoading(true);
-    try {
-      const { data, error: activitiesError } = await supabase
-        .from('user_activities')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (activitiesError) throw activitiesError;
-      
-      setActivities(data || []);
-      setRecentActivities(data?.slice(0, 10) || []);
-    } catch (err: any) {
-      setError(err.message || 'Error refreshing activities');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return {
     activities,
     recentActivities,
     courseProgress,
     loading,
-    error,
-    refreshActivities
+    error
   };
 };

@@ -5,159 +5,73 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%; /* Dark background */
-    --foreground: 0 0% 98%; /* Light text */
-    --card: 240 10% 3.9%; /* Dark card */
-    --card-foreground: 0 0% 98%; /* Light card text */
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
     --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
-    
-    /* Custom colors for vivid-purple and other specific colors */
-    --vivid-purple: 260 50% 50%; /* Adjusted purple for dark mode */
-    --magenta-pink: 320 60% 50%; /* Adjusted pink for dark mode */
-    --mid-gray: 0 0% 50%; /* Light gray for readability */
+    --vivid-purple: 260 50% 50%;
+    --magenta-pink: 320 60% 50%;
+    --mid-gray: 0 0% 50%;
   }
 
-  .dark {
-    /* Existing dark mode variables remain the same */
-  }
-}
-
-@layer base {
   * {
     @apply border-border selection:bg-white/10 selection:text-white;
   }
   
   body {
     @apply bg-background text-foreground antialiased;
-    overflow-x: hidden; /* Prevent horizontal scrolling */
-    overflow-y: auto; /* Allow vertical scrolling */
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   html {
-    @apply scroll-smooth; /* Enable smooth scrolling */
+    @apply scroll-smooth;
   }
 }
 
 @layer utilities {
+  /* Consistent glass morphism */
   .glass-morphism {
     @apply backdrop-blur-xl bg-black/30 border border-white/10 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.3)];
   }
   
-  .bg-size-200 {
-    background-size: 200% auto;
-  }
-  
-  .hover-scale {
-    transition: transform 0.3s ease-in-out;
-  }
-  
-  .hover-scale:hover {
-    transform: scale(1.03);
-  }
-  
-  .bg-right-bottom {
-    background-position: right bottom;
-  }
-  
-  .drop-shadow-glow {
-    filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.3));
-  }
-
-  /* Animation for the reveal on scroll */
-  .reveal-on-scroll {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-  }
-  
-  .reveal-on-scroll.animate-fade-in {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  
-  /* Responsive utilities */
+  /* Enhanced responsive utilities */
   .responsive-padding {
-    @apply px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16;
+    @apply px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16;
   }
   
   .responsive-grid {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6;
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6;
   }
 
   .responsive-text {
-    @apply text-sm sm:text-base md:text-lg lg:text-xl;
+    @apply text-sm sm:text-base lg:text-lg;
   }
 
   .responsive-heading {
-    @apply text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl;
+    @apply text-2xl sm:text-3xl lg:text-4xl xl:text-5xl;
   }
 
-  /* Animated gradient backgrounds */
-  .animated-gradient {
-    background: linear-gradient(270deg, #8b5cf6, #ec4899, #3b82f6);
-    background-size: 600% 600%;
-    animation: gradient-animation 8s ease infinite;
-  }
-  
-  @keyframes gradient-animation {
-    0% { background-position: 0% 50% }
-    50% { background-position: 100% 50% }
-    100% { background-position: 0% 50% }
+  .space-responsive {
+    @apply space-y-4 sm:space-y-6 lg:space-y-8;
   }
 
-  /* Enhanced form animations */
-  .form-slide-in {
-    animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  /* Smooth animations */
+  .animate-fade-in {
+    animation: fade-in 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 
-  .form-slide-out {
-    animation: slideOut 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  .animate-scale-in {
+    animation: scale-in 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateX(100px) scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0) scale(1);
-    }
+  .animate-bounce-in {
+    animation: bounce-in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
   }
 
-  @keyframes slideOut {
-    from {
-      opacity: 1;
-      transform: translateX(0) scale(1);
-    }
-    to {
-      opacity: 0;
-      transform: translateX(-100px) scale(0.95);
-    }
-  }
-
-  /* Smooth transitions for mode switching */
-  .mode-transition {
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .mode-transition.transitioning {
-    opacity: 0;
-    transform: scale(0.95) translateY(20px);
-  }
-
-  /* Smooth input focus effects */
-  .input-focus {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .input-focus:focus {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 20px -4px rgba(139, 92, 246, 0.3);
-  }
-
-  /* Button hover effects */
+  /* Consistent button hover effects */
   .btn-hover {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -184,32 +98,35 @@
     box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.4);
   }
 
-  /* Pulse animation for active elements */
-  .pulse-glow {
-    animation: pulseGlow 2s ease-in-out infinite;
+  /* Input focus effects */
+  .input-focus {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  @keyframes pulseGlow {
-    0%, 100% {
-      box-shadow: 0 0 5px rgba(139, 92, 246, 0.5);
-    }
-    50% {
-      box-shadow: 0 0 20px rgba(139, 92, 246, 0.8), 0 0 30px rgba(139, 92, 246, 0.6);
-    }
+  .input-focus:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px -4px rgba(139, 92, 246, 0.3);
   }
 
-  /* Responsive card sizing */
-  .card-responsive {
-    @apply w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg;
+  /* Form animations */
+  .form-slide-in {
+    animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 
-  /* Responsive spacing */
-  .space-responsive {
-    @apply space-y-2 sm:space-y-3 md:space-y-4 lg:space-y-6;
+  .form-slide-out {
+    animation: slideOut 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
+
+  /* Delay classes for staggered animations */
+  .delay-100 { animation-delay: 100ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-400 { animation-delay: 400ms; }
+  .delay-500 { animation-delay: 500ms; }
+  .delay-600 { animation-delay: 600ms; }
 }
 
-/* Add smooth scroll behavior to all pages */
+/* Keyframe definitions */
 @keyframes fade-in {
   0% {
     opacity: 0;
@@ -249,31 +166,29 @@
   }
 }
 
-.animate-fade-in {
-  animation: fade-in 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
 }
 
-.animate-scale-in {
-  animation: scale-in 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-100px) scale(0.95);
+  }
 }
 
-.animate-bounce-in {
-  animation: bounce-in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
-}
-
-/* Delay classes for staggered animations */
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-.delay-400 { animation-delay: 400ms; }
-.delay-500 { animation-delay: 500ms; }
-
-/* Prevent content from being hidden under the fixed navbar */
-.content-under-navbar {
-  scroll-margin-top: 80px;
-}
-
-/* Enhanced scrollbar styling for all pages */
+/* Enhanced scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -302,14 +217,10 @@
   border-radius: 4px;
 }
 
-/* Responsive breakpoints for consistent sizing */
+/* Responsive breakpoints */
 @media (max-width: 640px) {
   .responsive-container {
     @apply px-4 py-6;
-  }
-  
-  .responsive-card {
-    @apply mx-2;
   }
 }
 

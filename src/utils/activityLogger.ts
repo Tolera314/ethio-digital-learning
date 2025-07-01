@@ -1,25 +1,27 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/context/AuthContext";
-import { toast } from "@/components/ui/use-toast";
 import { Json } from "@/integrations/supabase/types";
 
 export type ActivityType = 
   | 'course_view'
   | 'course_progress'
+  | 'course_complete'
   | 'lesson_complete'
   | 'book_view'
   | 'certificate_earned'
   | 'session_join'
-  | 'login';
+  | 'login'
+  | 'dashboard_visit'
+  | 'page_visit';
 
-// Simplify ActivityMetadata to avoid circular references
 export interface ActivityMetadata {
   title?: string;
   progress?: number;
   duration?: number;
   category?: string;
   completed?: boolean;
+  page?: string;
+  section?: string;
 }
 
 /**
@@ -29,10 +31,9 @@ export const logActivity = async (
   activityType: ActivityType,
   resourceId?: string,
   resourceType?: string,
-  metadata: Record<string, unknown> = {}
+  metadata: ActivityMetadata = {}
 ) => {
   try {
-    // Get the current user ID from auth
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) {
       console.error('No authenticated user found when logging activity');
@@ -56,120 +57,138 @@ export const logActivity = async (
 };
 
 /**
- * Get user activity summary
+ * Get user activity summary with enhanced data
  */
 export const getUserActivitySummary = async () => {
   try {
-    // Get current user ID
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) {
-      console.error('No authenticated user found when getting activity summary');
-      return {
-        totalLearningTime: 0,
-        coursesInProgress: 0,
-        completedCourses: 0,
-        totalCertificates: 0,
-        enrolledCourses: 0,
-        totalBooks: 0,
-        totalReadingSessions: 0
-      };
+      return getDefaultSummary();
     }
 
-    // Get total learning time
-    const { data: timeData, error: timeError } = await supabase
+    // Get all user activities
+    const { data: activities, error } = await supabase
       .from('user_activities')
-      .select('metadata')
-      .eq('activity_type', 'lesson_complete')
-      .eq('user_id', session.user.id);
-    
-    if (timeError) throw timeError;
-    
-    // Calculate total learning time in minutes
-    const totalMinutes = timeData?.reduce((total, activity) => {
-      // Safe access to metadata properties by using simple type assertion
-      const metadata = activity.metadata as any;
-      return total + (Number(metadata?.duration) || 0);
-    }, 0) || 0;
-    
-    // Get total courses in progress
-    const { data: courseData, error: courseError } = await supabase
-      .from('user_activities')
-      .select('resource_id')
-      .eq('activity_type', 'course_progress')
-      .eq('user_id', session.user.id);
-    
-    if (courseError) throw courseError;
-    
-    const coursesInProgress = new Set(courseData?.map(c => c.resource_id)).size;
-    
-    // Get completed courses - use is for null checking instead of eq for boolean
-    const { data: completedData, error: completedError } = await supabase
-      .from('user_activities')
-      .select('resource_id')
-      .eq('activity_type', 'course_progress')
+      .select('*')
       .eq('user_id', session.user.id)
-      .not('metadata->completed', 'is', null);
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    // Calculate comprehensive stats
+    const totalActivities = activities?.length || 0;
     
-    if (completedError) throw completedError;
+    // Learning time calculation
+    const learningActivities = activities?.filter(a => 
+      a.activity_type === 'lesson_complete'
+    ) || [];
     
-    const completedCourses = new Set(completedData?.map(c => c.resource_id)).size;
+    const totalLearningTime = learningActivities.reduce((total, activity) => {
+      const metadata = activity.metadata as any;
+      return total + (Number(metadata?.duration) || 15); // Default 15 minutes per lesson
+    }, 0);
+
+    // Course progress tracking
+    const courseActivities = activities?.filter(a => 
+      a.activity_type === 'course_progress' || a.activity_type === 'course_view'
+    ) || [];
     
-    // Get total certificates
-    const { data: certData, error: certError } = await supabase
-      .from('user_activities')
-      .select('resource_id')
-      .eq('activity_type', 'certificate_earned')
-      .eq('user_id', session.user.id);
+    const uniqueCourses = new Set(courseActivities.map(a => a.resource_id));
+    const enrolledCourses = uniqueCourses.size;
     
-    if (certError) throw certError;
+    // Completed courses
+    const completedCourses = activities?.filter(a => 
+      a.activity_type === 'course_complete'
+    ).length || 0;
     
-    const totalCertificates = new Set(certData?.map(c => c.resource_id)).size;
+    // Certificates
+    const totalCertificates = activities?.filter(a => 
+      a.activity_type === 'certificate_earned'
+    ).length || 0;
     
-    // Get books read
-    const { data: booksData, error: booksError } = await supabase
-      .from('user_books')
-      .select('book_id')
-      .eq('user_id', session.user.id);
-      
-    if (booksError) throw booksError;
+    // Books interaction
+    const bookActivities = activities?.filter(a => 
+      a.activity_type === 'book_view'
+    ) || [];
+    const totalBooks = new Set(bookActivities.map(a => a.resource_id)).size;
     
-    const totalBooks = booksData?.length || 0;
+    // Sessions
+    const sessionActivities = activities?.filter(a => 
+      a.activity_type === 'session_join'
+    ) || [];
+    const totalReadingSessions = sessionActivities.length;
     
-    // Get reading sessions - using type assertions for newly created tables
-    let totalReadingSessions = 0;
-    try {
-      const { data: sessionsData } = await supabase
-        .from("session_participants" as any)
-        .select("session_id")
-        .eq("user_id", session.user.id);
-        
-      if (sessionsData) {
-        const uniqueSessionIds = new Set((sessionsData as any[]).map(s => s.session_id));
-        totalReadingSessions = uniqueSessionIds.size;
-      }
-    } catch (error) {
-      console.error('Error getting session participants:', error);
-    }
+    // Recent activity level (last 7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     
+    const recentActivities = activities?.filter(a => 
+      new Date(a.created_at) > sevenDaysAgo
+    ).length || 0;
+
     return {
-      totalLearningTime: totalMinutes,
-      coursesInProgress,
+      totalLearningTime,
+      coursesInProgress: enrolledCourses - completedCourses,
       completedCourses,
       totalCertificates,
-      enrolledCourses: coursesInProgress + completedCourses,
+      enrolledCourses,
       totalBooks,
-      totalReadingSessions
+      totalReadingSessions,
+      totalActivities,
+      recentActivities,
+      engagementLevel: calculateEngagementLevel(recentActivities, totalActivities)
     };
   } catch (error) {
     console.error('Error getting activity summary:', error);
-    return {
-      totalLearningTime: 0,
-      coursesInProgress: 0,
-      completedCourses: 0,
-      totalCertificates: 0,
-      enrolledCourses: 0,
-      totalBooks: 0,
-      totalReadingSessions: 0
-    };
+    return getDefaultSummary();
   }
+};
+
+/**
+ * Calculate user engagement level
+ */
+const calculateEngagementLevel = (recentActivities: number, totalActivities: number): 'low' | 'medium' | 'high' => {
+  if (totalActivities === 0) return 'low';
+  
+  const engagementRatio = recentActivities / Math.max(totalActivities, 1);
+  
+  if (engagementRatio > 0.3) return 'high';
+  if (engagementRatio > 0.1) return 'medium';
+  return 'low';
+};
+
+/**
+ * Default summary for new users or error cases
+ */
+const getDefaultSummary = () => ({
+  totalLearningTime: 0,
+  coursesInProgress: 0,
+  completedCourses: 0,
+  totalCertificates: 0,
+  enrolledCourses: 0,
+  totalBooks: 0,
+  totalReadingSessions: 0,
+  totalActivities: 0,
+  recentActivities: 0,
+  engagementLevel: 'low' as const
+});
+
+/**
+ * Log dashboard visit for analytics
+ */
+export const logDashboardVisit = async () => {
+  await logActivity('dashboard_visit', undefined, 'dashboard', {
+    page: 'student_dashboard',
+    section: 'main'
+  });
+};
+
+/**
+ * Log page visit for analytics
+ */
+export const logPageVisit = async (pageName: string, section?: string) => {
+  await logActivity('page_visit', undefined, 'page', {
+    page: pageName,
+    section: section || 'main'
+  });
 };

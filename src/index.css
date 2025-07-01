@@ -76,13 +76,21 @@
     transform: translateY(0);
   }
   
-  /* Media query utility classes */
+  /* Responsive utilities */
   .responsive-padding {
-    @apply px-4 sm:px-6 md:px-8 lg:px-12;
+    @apply px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16;
   }
   
   .responsive-grid {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6;
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6;
+  }
+
+  .responsive-text {
+    @apply text-sm sm:text-base md:text-lg lg:text-xl;
+  }
+
+  .responsive-heading {
+    @apply text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl;
   }
 
   /* Animated gradient backgrounds */
@@ -129,14 +137,24 @@
     }
   }
 
+  /* Smooth transitions for mode switching */
+  .mode-transition {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .mode-transition.transitioning {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+
   /* Smooth input focus effects */
   .input-focus {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .input-focus:focus {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px -4px rgba(139, 92, 246, 0.3);
   }
 
   /* Button hover effects */
@@ -161,6 +179,11 @@
     left: 100%;
   }
 
+  .btn-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.4);
+  }
+
   /* Pulse animation for active elements */
   .pulse-glow {
     animation: pulseGlow 2s ease-in-out infinite;
@@ -173,6 +196,16 @@
     50% {
       box-shadow: 0 0 20px rgba(139, 92, 246, 0.8), 0 0 30px rgba(139, 92, 246, 0.6);
     }
+  }
+
+  /* Responsive card sizing */
+  .card-responsive {
+    @apply w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg;
+  }
+
+  /* Responsive spacing */
+  .space-responsive {
+    @apply space-y-2 sm:space-y-3 md:space-y-4 lg:space-y-6;
   }
 }
 
@@ -242,8 +275,8 @@
 
 /* Enhanced scrollbar styling for all pages */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -254,7 +287,7 @@
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(45deg, rgba(139, 92, 246, 0.6), rgba(236, 72, 153, 0.6));
   border-radius: 10px;
-  border: 2px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -267,4 +300,33 @@
   outline: 2px solid rgba(139, 92, 246, 0.6);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* Responsive breakpoints for consistent sizing */
+@media (max-width: 640px) {
+  .responsive-container {
+    @apply px-4 py-6;
+  }
+  
+  .responsive-card {
+    @apply mx-2;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .responsive-container {
+    @apply px-6 py-8;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .responsive-container {
+    @apply px-8 py-10;
+  }
+}
+
+@media (min-width: 1025px) {
+  .responsive-container {
+    @apply px-12 py-12;
+  }
 }

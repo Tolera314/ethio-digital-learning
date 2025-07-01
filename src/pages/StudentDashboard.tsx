@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -7,8 +7,20 @@ import { Badge } from "@/components/ui/badge";
 import { BookOpen, Clock, Award, TrendingUp, Play, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
 import ProfessionalNavbar from "@/components/layout/ProfessionalNavbar";
+import InformationCollectionModal from "@/components/auth/InformationCollectionModal";
+import { useAuth } from "@/context/AuthContext";
 
 const StudentDashboard = () => {
+  const { user } = useAuth();
+  const [showInfoModal, setShowInfoModal] = useState(false);
+
+  useEffect(() => {
+    // Check if user has completed their profile
+    if (user && !user.user_metadata?.profile_completed) {
+      setShowInfoModal(true);
+    }
+  }, [user]);
+
   const recentCourses = [
     { id: 1, title: "React Fundamentals", progress: 75, lastAccessed: "2 hours ago" },
     { id: 2, title: "JavaScript Essentials", progress: 45, lastAccessed: "1 day ago" },
@@ -143,6 +155,11 @@ const StudentDashboard = () => {
           </Card>
         </div>
       </div>
+
+      <InformationCollectionModal 
+        isOpen={showInfoModal} 
+        onClose={() => setShowInfoModal(false)} 
+      />
     </div>
   );
 };

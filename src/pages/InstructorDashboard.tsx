@@ -1,10 +1,22 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import ProfessionalNavbar from '@/components/layout/ProfessionalNavbar';
+import InformationCollectionModal from '@/components/auth/InformationCollectionModal';
 import { BookOpen, Users, Calendar, BarChart3 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 const InstructorDashboard = () => {
+  const { user } = useAuth();
+  const [showInfoModal, setShowInfoModal] = useState(false);
+
+  useEffect(() => {
+    // Check if user has completed their profile
+    if (user && !user.user_metadata?.profile_completed) {
+      setShowInfoModal(true);
+    }
+  }, [user]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <ProfessionalNavbar />
@@ -114,6 +126,11 @@ const InstructorDashboard = () => {
           </Card>
         </div>
       </div>
+
+      <InformationCollectionModal 
+        isOpen={showInfoModal} 
+        onClose={() => setShowInfoModal(false)} 
+      />
     </div>
   );
 };

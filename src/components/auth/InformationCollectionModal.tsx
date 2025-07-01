@@ -114,48 +114,50 @@ const InformationCollectionModal: React.FC<InformationCollectionModalProps> = ({
   ];
 
   const renderStep1 = () => (
-    <div className="space-y-4">
-      <div>
-        <Label htmlFor="phone">Phone Number</Label>
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="phone" className="text-sm font-medium text-gray-700">Phone Number</Label>
         <Input
           id="phone"
           type="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
+          className="w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
-      <div>
-        <Label htmlFor="address">Address</Label>
+      <div className="space-y-2">
+        <Label htmlFor="address" className="text-sm font-medium text-gray-700">Address</Label>
         <Textarea
           id="address"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
           rows={2}
+          className="w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="dateOfBirth">Date of Birth</Label>
+        <div className="space-y-2">
+          <Label htmlFor="dateOfBirth" className="text-sm font-medium text-gray-700">Date of Birth</Label>
           <Input
             id="dateOfBirth"
             type="date"
             value={dateOfBirth}
             onChange={(e) => setDateOfBirth(e.target.value)}
+            className="w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         
-        <div>
-          <Label htmlFor="gender">Gender</Label>
+        <div className="space-y-2">
+          <Label htmlFor="gender" className="text-sm font-medium text-gray-700">Gender</Label>
           <Select value={gender} onValueChange={setGender}>
-            <SelectTrigger>
+            <SelectTrigger className="w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
               <SelectValue placeholder="Select gender" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="male">Male</SelectItem>
-              <SelectItem value="female">Female</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
+            <SelectContent className="bg-white border border-gray-200 shadow-lg z-50">
+              <SelectItem value="male" className="hover:bg-blue-50 focus:bg-blue-50">Male</SelectItem>
+              <SelectItem value="female" className="hover:bg-blue-50 focus:bg-blue-50">Female</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -164,78 +166,82 @@ const InformationCollectionModal: React.FC<InformationCollectionModalProps> = ({
   );
 
   const renderStep2 = () => (
-    <div className="space-y-4">
-      <div>
-        <Label htmlFor="educationLevel">Education Level</Label>
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="educationLevel" className="text-sm font-medium text-gray-700">Education Level</Label>
         <Select value={educationLevel} onValueChange={setEducationLevel}>
-          <SelectTrigger>
+          <SelectTrigger className="w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             <SelectValue placeholder="Select education level" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="high_school">High School</SelectItem>
-            <SelectItem value="bachelors">Bachelor's Degree</SelectItem>
-            <SelectItem value="masters">Master's Degree</SelectItem>
-            <SelectItem value="phd">PhD</SelectItem>
-            <SelectItem value="other">Other</SelectItem>
+          <SelectContent className="bg-white border border-gray-200 shadow-lg z-50">
+            <SelectItem value="high_school" className="hover:bg-blue-50 focus:bg-blue-50">High School</SelectItem>
+            <SelectItem value="bachelors" className="hover:bg-blue-50 focus:bg-blue-50">Bachelor's Degree</SelectItem>
+            <SelectItem value="masters" className="hover:bg-blue-50 focus:bg-blue-50">Master's Degree</SelectItem>
+            <SelectItem value="phd" className="hover:bg-blue-50 focus:bg-blue-50">PhD</SelectItem>
+            <SelectItem value="other" className="hover:bg-blue-50 focus:bg-blue-50">Other</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      <div>
-        <Label htmlFor="institution">Institution/University</Label>
+      <div className="space-y-2">
+        <Label htmlFor="institution" className="text-sm font-medium text-gray-700">Institution/University</Label>
         <Input
           id="institution"
           type="text"
           value={institution}
           onChange={(e) => setInstitution(e.target.value)}
+          className="w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
       {role === 'instructor' && (
         <>
-          <div>
-            <Label htmlFor="yearsOfExperience">Years of Teaching Experience</Label>
+          <div className="space-y-2">
+            <Label htmlFor="yearsOfExperience" className="text-sm font-medium text-gray-700">Years of Teaching Experience</Label>
             <Input
               id="yearsOfExperience"
               type="number"
               value={yearsOfExperience}
               onChange={(e) => setYearsOfExperience(e.target.value)}
               min="0"
+              className="w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
-          <div>
-            <Label htmlFor="specialization">Specialization/Field of Expertise</Label>
+          <div className="space-y-2">
+            <Label htmlFor="specialization" className="text-sm font-medium text-gray-700">Specialization/Field of Expertise</Label>
             <Input
               id="specialization"
               type="text"
               value={specialization}
               onChange={(e) => setSpecialization(e.target.value)}
+              className="w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </>
       )}
 
-      <div>
-        <Label>
+      <div className="space-y-3">
+        <Label className="text-sm font-medium text-gray-700">
           {role === 'instructor' ? 'Subjects You Can Teach' : 'Preferred Subjects/Areas of Interest'}
         </Label>
-        <div className="grid grid-cols-3 gap-2 mt-2 max-h-32 overflow-y-auto">
+        <div className="grid grid-cols-2 gap-3 max-h-40 overflow-y-auto p-4 border border-gray-200 rounded-lg bg-gray-50">
           {subjects.map((subject) => (
-            <div key={subject} className="flex items-center space-x-2">
+            <div key={subject} className="flex items-center space-x-3 p-2 rounded hover:bg-white transition-colors">
               <Checkbox
                 id={subject}
                 checked={preferredSubjects.includes(subject)}
                 onCheckedChange={() => handleSubjectToggle(subject)}
+                className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
               />
-              <Label htmlFor={subject} className="text-sm">{subject}</Label>
+              <Label htmlFor={subject} className="text-sm text-gray-700 cursor-pointer">{subject}</Label>
             </div>
           ))}
         </div>
       </div>
 
-      <div>
-        <Label htmlFor="motivation">
+      <div className="space-y-2">
+        <Label htmlFor="motivation" className="text-sm font-medium text-gray-700">
           {role === 'instructor' ? 'Why do you want to teach on our platform?' : 'Why do you want to join our platform?'}
         </Label>
         <Textarea
@@ -243,21 +249,22 @@ const InformationCollectionModal: React.FC<InformationCollectionModalProps> = ({
           value={motivation}
           onChange={(e) => setMotivation(e.target.value)}
           rows={3}
+          className="w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
-      <div>
-        <Label htmlFor="howDidYouHear">How did you hear about us?</Label>
+      <div className="space-y-2">
+        <Label htmlFor="howDidYouHear" className="text-sm font-medium text-gray-700">How did you hear about us?</Label>
         <Select value={howDidYouHear} onValueChange={setHowDidYouHear}>
-          <SelectTrigger>
+          <SelectTrigger className="w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             <SelectValue placeholder="Select an option" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="social_media">Social Media</SelectItem>
-            <SelectItem value="search_engine">Search Engine</SelectItem>
-            <SelectItem value="friend_referral">Friend Referral</SelectItem>
-            <SelectItem value="advertisement">Advertisement</SelectItem>
-            <SelectItem value="other">Other</SelectItem>
+          <SelectContent className="bg-white border border-gray-200 shadow-lg z-50">
+            <SelectItem value="social_media" className="hover:bg-blue-50 focus:bg-blue-50">Social Media</SelectItem>
+            <SelectItem value="search_engine" className="hover:bg-blue-50 focus:bg-blue-50">Search Engine</SelectItem>
+            <SelectItem value="friend_referral" className="hover:bg-blue-50 focus:bg-blue-50">Friend Referral</SelectItem>
+            <SelectItem value="advertisement" className="hover:bg-blue-50 focus:bg-blue-50">Advertisement</SelectItem>
+            <SelectItem value="other" className="hover:bg-blue-50 focus:bg-blue-50">Other</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -265,61 +272,68 @@ const InformationCollectionModal: React.FC<InformationCollectionModalProps> = ({
   );
 
   const renderStep3 = () => (
-    <div className="space-y-4">
-      <div>
-        <Label htmlFor="linkedinProfile">LinkedIn Profile</Label>
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="linkedinProfile" className="text-sm font-medium text-gray-700">LinkedIn Profile</Label>
         <Input
           id="linkedinProfile"
           type="url"
           value={linkedinProfile}
           onChange={(e) => setLinkedinProfile(e.target.value)}
           placeholder="https://linkedin.com/in/your-profile"
+          className="w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
-      <div>
-        <Label htmlFor="githubProfile">GitHub Profile</Label>
+      <div className="space-y-2">
+        <Label htmlFor="githubProfile" className="text-sm font-medium text-gray-700">GitHub Profile</Label>
         <Input
           id="githubProfile"
           type="url"
           value={githubProfile}
           onChange={(e) => setGithubProfile(e.target.value)}
           placeholder="https://github.com/your-username"
+          className="w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
-      <div>
-        <Label htmlFor="portfolioUrl">Portfolio/Website URL</Label>
+      <div className="space-y-2">
+        <Label htmlFor="portfolioUrl" className="text-sm font-medium text-gray-700">Portfolio/Website URL</Label>
         <Input
           id="portfolioUrl"
           type="url"
           value={portfolioUrl}
           onChange={(e) => setPortfolioUrl(e.target.value)}
           placeholder="https://your-portfolio.com"
+          className="w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
-      <div className="border-t pt-4">
-        <h4 className="font-medium mb-3">Emergency Contact</h4>
+      <div className="border-t pt-6">
+        <h4 className="font-medium mb-4 text-gray-900">Emergency Contact</h4>
         
-        <div>
-          <Label htmlFor="emergencyContactName">Emergency Contact Name</Label>
-          <Input
-            id="emergencyContactName"
-            type="text"
-            value={emergencyContactName}
-            onChange={(e) => setEmergencyContactName(e.target.value)}
-          />
-        </div>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="emergencyContactName" className="text-sm font-medium text-gray-700">Emergency Contact Name</Label>
+            <Input
+              id="emergencyContactName"
+              type="text"
+              value={emergencyContactName}
+              onChange={(e) => setEmergencyContactName(e.target.value)}
+              className="w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
 
-        <div>
-          <Label htmlFor="emergencyContactPhone">Emergency Contact Phone</Label>
-          <Input
-            id="emergencyContactPhone"
-            type="tel"
-            value={emergencyContactPhone}
-            onChange={(e) => setEmergencyContactPhone(e.target.value)}
-          />
+          <div className="space-y-2">
+            <Label htmlFor="emergencyContactPhone" className="text-sm font-medium text-gray-700">Emergency Contact Phone</Label>
+            <Input
+              id="emergencyContactPhone"
+              type="tel"
+              value={emergencyContactPhone}
+              onChange={(e) => setEmergencyContactPhone(e.target.value)}
+              className="w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -327,10 +341,10 @@ const InformationCollectionModal: React.FC<InformationCollectionModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Complete Your Profile</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
+        <DialogHeader className="border-b pb-4">
+          <DialogTitle className="text-xl font-semibold text-gray-900">Complete Your Profile</DialogTitle>
+          <DialogDescription className="text-gray-600">
             Step {currentStep} of 3: {
               currentStep === 1 ? 'Personal Information' :
               currentStep === 2 ? 'Academic & Professional Details' :
@@ -339,17 +353,18 @@ const InformationCollectionModal: React.FC<InformationCollectionModalProps> = ({
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-8 pt-4">
           {currentStep === 1 && renderStep1()}
           {currentStep === 2 && renderStep2()}
           {currentStep === 3 && renderStep3()}
 
-          <div className="flex justify-between">
+          <div className="flex justify-between pt-6 border-t">
             {currentStep > 1 && (
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setCurrentStep(currentStep - 1)}
+                className="border-gray-300 text-gray-700 hover:bg-gray-50"
               >
                 Previous
               </Button>
@@ -361,11 +376,16 @@ const InformationCollectionModal: React.FC<InformationCollectionModalProps> = ({
               <Button
                 type="button"
                 onClick={() => setCurrentStep(currentStep + 1)}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 Next
               </Button>
             ) : (
-              <Button type="submit" disabled={isLoading}>
+              <Button 
+                type="submit" 
+                disabled={isLoading}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Complete Profile
               </Button>

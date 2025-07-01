@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -81,19 +80,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess, onSwitchToLogin }) =
           emailRedirectTo: `${window.location.origin}/`,
           data: {
             full_name: fullName,
-            desired_role: desiredRole
-          }
-        }
-      });
-
-      if (error) throw error;
-
-      if (data.user) {
-        // Save additional user details
-        const { error: detailsError } = await supabase
-          .from('user_details')
-          .insert({
-            user_id: data.user.id,
+            desired_role: desiredRole,
             phone,
             address,
             date_of_birth: dateOfBirth || null,
@@ -110,12 +97,13 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess, onSwitchToLogin }) =
             portfolio_url: portfolioUrl,
             emergency_contact_name: emergencyContactName,
             emergency_contact_phone: emergencyContactPhone
-          });
-
-        if (detailsError) {
-          console.error('Error saving user details:', detailsError);
+          }
         }
+      });
 
+      if (error) throw error;
+
+      if (data.user) {
         // Update user role if not student
         if (desiredRole !== 'student') {
           const { error: roleError } = await supabase

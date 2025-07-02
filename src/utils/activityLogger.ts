@@ -43,6 +43,7 @@ export interface ActivityMetadata {
   file_name?: string;
   tags?: string[];
   description?: string;
+  action?: string; // Added to fix the error
 }
 
 /**

@@ -45,6 +45,14 @@ export const CertificateApproval = () => {
           completion_date: '2025-01-10',
           payment_status: 'completed',
           status: 'pending'
+        },
+        {
+          id: '3',
+          student_name: 'Ahmed Hassan',
+          course_title: 'Data Analysis with Python',
+          completion_date: '2025-01-12',
+          payment_status: 'pending',
+          status: 'pending'
         }
       ];
       
@@ -72,8 +80,9 @@ export const CertificateApproval = () => {
         )
       );
 
+      // Log the activity with proper metadata
       await logActivity('certificate_approve', certificateId, 'certificate', {
-        action,
+        action: action,
         certificate_id: certificateId
       });
 
@@ -92,43 +101,58 @@ export const CertificateApproval = () => {
   };
 
   if (loading) {
-    return <div className="text-center py-8">Loading certificates...</div>;
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
+          <p className="text-gray-300">Loading certificates...</p>
+        </div>
+      </div>
+    );
   }
 
+  const pendingCertificates = certificates.filter(cert => cert.status === 'pending');
+
   return (
-    <Card>
+    <Card className="glass-morphism border-white/10">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="h-5 w-5" />
+        <CardTitle className="flex items-center gap-2 text-white">
+          <FileText className="h-5 w-5 text-yellow-400" />
           Certificate Approval
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {certificates.filter(cert => cert.status === 'pending').map((certificate) => (
-            <div key={certificate.id} className="p-4 border rounded-lg bg-gray-50">
+          {pendingCertificates.map((certificate) => (
+            <div key={certificate.id} className="p-4 border border-white/10 rounded-lg bg-black/30 hover:bg-black/40 transition-colors">
               <div className="flex justify-between items-start mb-3">
-                <div>
-                  <h4 className="font-semibold">{certificate.student_name}</h4>
-                  <p className="text-sm text-gray-600">{certificate.course_title}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Calendar className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm text-gray-500">
+                <div className="flex-1">
+                  <h4 className="font-semibold text-white">{certificate.student_name}</h4>
+                  <p className="text-sm text-gray-300">{certificate.course_title}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Calendar className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm text-gray-400">
                       Completed: {new Date(certificate.completion_date).toLocaleDateString()}
                     </span>
                   </div>
                 </div>
-                <Badge variant={certificate.payment_status === 'completed' ? 'default' : 'secondary'}>
-                  {certificate.payment_status}
+                <Badge 
+                  variant={certificate.payment_status === 'completed' ? 'default' : 'destructive'}
+                  className={certificate.payment_status === 'completed' 
+                    ? 'bg-green-600 hover:bg-green-700' 
+                    : 'bg-red-600 hover:bg-red-700'
+                  }
+                >
+                  {certificate.payment_status === 'completed' ? 'Payment Complete' : 'Payment Pending'}
                 </Badge>
               </div>
               
-              {certificate.payment_status === 'completed' && (
+              {certificate.payment_status === 'completed' ? (
                 <div className="flex gap-2">
                   <Button
                     size="sm"
                     onClick={() => handleCertificateAction(certificate.id, 'approve')}
-                    className="bg-green-600 hover:bg-green-700"
+                    className="bg-green-600 hover:bg-green-700 text-white"
                   >
                     <CheckCircle className="h-4 w-4 mr-1" />
                     Approve
@@ -137,18 +161,26 @@ export const CertificateApproval = () => {
                     size="sm"
                     variant="outline"
                     onClick={() => handleCertificateAction(certificate.id, 'reject')}
-                    className="border-red-300 text-red-600 hover:bg-red-50"
+                    className="border-red-300 text-red-400 hover:bg-red-900/20 hover:text-red-300"
                   >
                     <XCircle className="h-4 w-4 mr-1" />
                     Reject
                   </Button>
                 </div>
+              ) : (
+                <p className="text-amber-400 text-sm">
+                  ⚠️ Payment must be completed before certificate can be approved
+                </p>
               )}
             </div>
           ))}
           
-          {certificates.filter(cert => cert.status === 'pending').length === 0 && (
-            <p className="text-center text-gray-500 py-8">No pending certificates</p>
+          {pendingCertificates.length === 0 && (
+            <div className="text-center py-12">
+              <FileText className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+              <p className="text-gray-400 text-lg">No pending certificates</p>
+              <p className="text-gray-500 text-sm">All certificates have been processed</p>
+            </div>
           )}
         </div>
       </CardContent>

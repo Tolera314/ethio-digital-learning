@@ -9,10 +9,11 @@ import InformationCollectionModal from "@/components/auth/InformationCollectionM
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { RecentActivitiesCard } from "@/components/dashboard/RecentActivities";
 import { CourseProgressCard } from "@/components/dashboard/CourseProgressList";
+import { CertificateActions } from "@/components/student/CertificateActions";
 import { DynamicRecommendations } from "@/components/DynamicRecommendations";
 import { useAuth } from "@/context/AuthContext";
 import { useUserActivities } from "@/hooks/useUserActivities";
-import { getUserActivitySummary } from "@/utils/activityLogger";
+import { getUserActivitySummary, logDashboardVisit } from "@/utils/activityLogger";
 
 const StudentDashboard = () => {
   const { user } = useAuth();
@@ -25,6 +26,26 @@ const StudentDashboard = () => {
     loading: activitiesLoading 
   } = useUserActivities();
 
+  // Mock certificates data - replace with actual data from Supabase
+  const [certificates] = useState([
+    {
+      id: '1',
+      title: 'Web Development Fundamentals',
+      date: '2025-01-15',
+      instructor: 'Dr. Abebe Bekele',
+      status: 'approved' as const,
+      paymentCompleted: true
+    },
+    {
+      id: '2',
+      title: 'UX/UI Design Principles',
+      date: '2025-01-10',
+      instructor: 'Sara Tadesse',
+      status: 'pending' as const,
+      paymentCompleted: false
+    }
+  ]);
+
   useEffect(() => {
     if (user && !user.user_metadata?.profile_completed) {
       setShowInfoModal(true);
@@ -35,6 +56,7 @@ const StudentDashboard = () => {
     const loadActivitySummary = async () => {
       const summary = await getUserActivitySummary();
       setActivitySummary(summary);
+      await logDashboardVisit();
     };
     
     if (user) {
@@ -77,6 +99,11 @@ const StudentDashboard = () => {
               courseProgress={courseProgress} 
               isLoading={activitiesLoading} 
             />
+          </div>
+
+          {/* Certificates Section */}
+          <div className="animate-fade-in delay-250">
+            <CertificateActions certificates={certificates} />
           </div>
 
           {/* Upcoming Sessions */}

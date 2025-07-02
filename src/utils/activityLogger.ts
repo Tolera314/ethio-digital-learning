@@ -12,18 +12,37 @@ export type ActivityType =
   | 'session_join'
   | 'login'
   | 'dashboard_visit'
-  | 'page_visit';
+  | 'page_visit'
+  | 'video_upload'
+  | 'material_upload'
+  | 'live_session_create'
+  | 'certificate_approve'
+  | 'instructor_rate'
+  | 'video_like'
+  | 'video_comment'
+  | 'video_share';
 
 export interface ActivityMetadata {
   title?: string;
   author?: string;
   book_title?: string;
+  book_id?: string;
   progress?: number;
   duration?: number;
   category?: string;
   completed?: boolean;
   page?: string;
   section?: string;
+  video_id?: string;
+  rating?: number;
+  comment?: string;
+  instructor_id?: string;
+  session_id?: string;
+  certificate_id?: string;
+  material_type?: string;
+  file_name?: string;
+  tags?: string[];
+  description?: string;
 }
 
 /**

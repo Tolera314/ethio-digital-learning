@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BookOpen, Users, Award, TrendingUp, Play, Clock, Star, ArrowRight, Zap } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import PageLayout from "@/components/PageLayout";
@@ -28,7 +27,6 @@ const Index = () => {
         const summary = await getUserActivitySummary();
         setActivitySummary(summary);
         
-        // Generate personalized recommendations based on user activity
         const recommendations = generateRecommendations(summary, recentActivities);
         setPersonalizedRecommendations(recommendations);
       }
@@ -42,7 +40,6 @@ const Index = () => {
   const generateRecommendations = (summary, activities) => {
     const recommendations = [];
     
-    // If user has no courses, recommend starting with basics
     if (summary.enrolledCourses === 0) {
       recommendations.push({
         type: 'course',
@@ -54,7 +51,6 @@ const Index = () => {
       });
     }
     
-    // If user has been active in reading, recommend more books
     const hasReadingActivity = activities.some(a => a.activity_type === 'book_view');
     if (hasReadingActivity) {
       recommendations.push({
@@ -67,7 +63,6 @@ const Index = () => {
       });
     }
     
-    // If user has course progress, recommend live sessions
     if (summary.enrolledCourses > 0) {
       recommendations.push({
         type: 'session',
@@ -114,11 +109,10 @@ const Index = () => {
       backgroundImage="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=1200&q=80"
     >
       {user ? (
-        // Authenticated User Dashboard
-        <div className="space-y-8">
+        <div className="space-responsive">
           {/* Personal Stats Row */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 border-purple-500/30 backdrop-blur-lg">
+          <div className="responsive-grid">
+            <Card className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 border-purple-500/30 glass-morphism animate-scale-in">
               <CardContent className="p-4 text-center">
                 <Clock className="mx-auto mb-2 text-purple-400" size={24} />
                 <div className="text-2xl font-bold text-white">{formatTime(activitySummary.totalLearningTime)}</div>
@@ -126,7 +120,7 @@ const Index = () => {
               </CardContent>
             </Card>
             
-            <Card className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 border-green-500/30 backdrop-blur-lg">
+            <Card className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 border-green-500/30 glass-morphism animate-scale-in delay-100">
               <CardContent className="p-4 text-center">
                 <BookOpen className="mx-auto mb-2 text-green-400" size={24} />
                 <div className="text-2xl font-bold text-white">{activitySummary.enrolledCourses}</div>
@@ -134,7 +128,7 @@ const Index = () => {
               </CardContent>
             </Card>
             
-            <Card className="bg-gradient-to-br from-yellow-600/20 to-orange-600/20 border-yellow-500/30 backdrop-blur-lg">
+            <Card className="bg-gradient-to-br from-yellow-600/20 to-orange-600/20 border-yellow-500/30 glass-morphism animate-scale-in delay-200">
               <CardContent className="p-4 text-center">
                 <Award className="mx-auto mb-2 text-yellow-400" size={24} />
                 <div className="text-2xl font-bold text-white">{activitySummary.totalCertificates}</div>
@@ -142,7 +136,7 @@ const Index = () => {
               </CardContent>
             </Card>
             
-            <Card className="bg-gradient-to-br from-red-600/20 to-pink-600/20 border-red-500/30 backdrop-blur-lg">
+            <Card className="bg-gradient-to-br from-red-600/20 to-pink-600/20 border-red-500/30 glass-morphism animate-scale-in delay-300">
               <CardContent className="p-4 text-center">
                 <Zap className="mx-auto mb-2 text-red-400" size={24} />
                 <div className="text-2xl font-bold text-white">{getUserStreak()}</div>
@@ -153,16 +147,16 @@ const Index = () => {
 
           {/* Personalized Recommendations */}
           {personalizedRecommendations.length > 0 && (
-            <div>
+            <div className="animate-fade-in delay-500">
               <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
                 <Star className="text-yellow-400" size={24} />
                 Recommended for You
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="responsive-grid">
                 {personalizedRecommendations.map((rec, index) => (
-                  <Card key={index} className={`bg-black/40 border backdrop-blur-lg hover:scale-105 transition-all duration-300 cursor-pointer ${
+                  <Card key={index} className={`glass-morphism hover:scale-105 transition-all duration-300 cursor-pointer animate-fade-in ${
                     rec.priority === 'high' ? 'border-yellow-500/50 shadow-yellow-500/20' : 'border-white/10'
-                  }`}>
+                  }`} style={{ animationDelay: `${index * 100}ms` }}>
                     <CardHeader>
                       <CardTitle className="text-lg text-white flex items-center justify-between">
                         {rec.title}
@@ -172,7 +166,7 @@ const Index = () => {
                     <CardContent>
                       <p className="text-gray-300 mb-4">{rec.description}</p>
                       <Link to={rec.link}>
-                        <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600">
+                        <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 btn-hover">
                           {rec.action}
                           <ArrowRight size={16} className="ml-2" />
                         </Button>
@@ -185,10 +179,10 @@ const Index = () => {
           )}
 
           {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="responsive-grid animate-fade-in delay-600">
             <Button 
               onClick={() => navigate('/dashboard')} 
-              className="h-16 bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white font-semibold"
+              className="h-16 bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white font-semibold btn-hover"
             >
               <TrendingUp className="mr-2" size={20} />
               View Dashboard
@@ -197,7 +191,7 @@ const Index = () => {
             <Button 
               onClick={() => navigate('/courses')} 
               variant="outline" 
-              className="h-16 border-white/20 hover:bg-white/10 text-white font-semibold"
+              className="h-16 border-white/20 hover:bg-white/10 text-white font-semibold btn-hover"
             >
               <BookOpen className="mr-2" size={20} />
               Browse Courses
@@ -206,7 +200,7 @@ const Index = () => {
             <Button 
               onClick={() => navigate('/live-sessions')} 
               variant="outline" 
-              className="h-16 border-white/20 hover:bg-white/10 text-white font-semibold"
+              className="h-16 border-white/20 hover:bg-white/10 text-white font-semibold btn-hover"
             >
               <Play className="mr-2" size={20} />
               Live Sessions
@@ -215,7 +209,7 @@ const Index = () => {
             <Button 
               onClick={() => navigate('/library')} 
               variant="outline" 
-              className="h-16 border-white/20 hover:bg-white/10 text-white font-semibold"
+              className="h-16 border-white/20 hover:bg-white/10 text-white font-semibold btn-hover"
             >
               <BookOpen className="mr-2" size={20} />
               Digital Library
@@ -223,14 +217,13 @@ const Index = () => {
           </div>
         </div>
       ) : (
-        // Guest User Experience
         <div className="space-y-12">
           {/* Hero CTA */}
           <div className="text-center space-y-6">
             <Button 
               onClick={() => navigate('/auth')} 
               size="lg" 
-              className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white font-bold text-lg shadow-2xl hover:scale-105 transition-all"
+              className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white font-bold text-lg shadow-2xl hover:scale-105 transition-all btn-hover"
             >
               Start Learning Today - It's Free!
             </Button>

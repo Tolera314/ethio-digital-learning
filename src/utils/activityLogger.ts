@@ -16,6 +16,8 @@ export type ActivityType =
 
 export interface ActivityMetadata {
   title?: string;
+  author?: string;
+  book_title?: string;
   progress?: number;
   duration?: number;
   category?: string;

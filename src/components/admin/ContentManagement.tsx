@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,9 +27,7 @@ interface Comment {
   id: string;
   comment_text: string;
   created_at: string;
-  profiles: {
-    full_name: string | null;
-  } | null;
+  user_name: string | null;
 }
 
 export const ContentManagement = () => {
@@ -100,23 +99,33 @@ export const ContentManagement = () => {
 
   const fetchComments = async (contentId: string) => {
     try {
-      const { data, error } = await supabase
+      const { data: comments, error } = await supabase
         .from('content_comments')
-        .select(`
-          id,
-          comment_text,
-          created_at,
-          user_id,
-          profiles!inner(full_name)
-        `)
+        .select('id, comment_text, created_at, user_id')
         .eq('content_id', contentId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setComments(data || []);
+
+      // Fetch profiles for each comment
+      const commentsWithProfiles = await Promise.all(
+        (comments || []).map(async (comment) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', comment.user_id)
+            .single();
+
+          return {
+            ...comment,
+            user_name: profile?.full_name || 'Anonymous'
+          };
+        })
+      );
+
+      setComments(commentsWithProfiles);
     } catch (error) {
       console.error('Error fetching comments:', error);
-      // Set empty comments if there's an error
       setComments([]);
     }
   };
@@ -353,7 +362,7 @@ export const ContentManagement = () => {
                   <div className="flex justify-between items-start mb-1">
                     <div>
                       <span className="font-medium text-sm">
-                        {comment.profiles?.full_name || 'Anonymous'}
+                        {comment.user_name || 'Anonymous'}
                       </span>
                       <span className="text-xs text-gray-500 ml-2">
                         {new Date(comment.created_at).toLocaleDateString()}

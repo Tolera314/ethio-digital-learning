@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface ContentItem {
   id: string;
   title: string;
-  description: string;
+  description: string | null;
   file_type: string;
   file_name: string;
   is_published: boolean;
@@ -28,8 +27,8 @@ interface Comment {
   comment_text: string;
   created_at: string;
   profiles: {
-    full_name: string;
-  };
+    full_name: string | null;
+  } | null;
 }
 
 export const ContentManagement = () => {
@@ -104,8 +103,11 @@ export const ContentManagement = () => {
       const { data, error } = await supabase
         .from('content_comments')
         .select(`
-          *,
-          profiles(full_name)
+          id,
+          comment_text,
+          created_at,
+          user_id,
+          profiles!inner(full_name)
         `)
         .eq('content_id', contentId)
         .order('created_at', { ascending: false });
@@ -114,6 +116,8 @@ export const ContentManagement = () => {
       setComments(data || []);
     } catch (error) {
       console.error('Error fetching comments:', error);
+      // Set empty comments if there's an error
+      setComments([]);
     }
   };
 
@@ -246,7 +250,7 @@ export const ContentManagement = () => {
                   <Badge variant={item.is_published ? "default" : "secondary"}>
                     {item.is_published ? "Published" : "Draft"}
                   </Badge>
-                  {item.reports_count > 0 && (
+                  {item.reports_count && item.reports_count > 0 && (
                     <Badge variant="destructive">
                       {item.reports_count} Reports
                     </Badge>
@@ -263,15 +267,15 @@ export const ContentManagement = () => {
                 <div className="flex items-center gap-4 text-sm text-gray-600">
                   <span className="flex items-center gap-1">
                     <Flag className="h-4 w-4" />
-                    {item.reports_count} Reports
+                    {item.reports_count || 0} Reports
                   </span>
                   <span className="flex items-center gap-1">
                     <MessageSquare className="h-4 w-4" />
-                    {item.comments_count} Comments
+                    {item.comments_count || 0} Comments
                   </span>
                   <span className="flex items-center gap-1">
                     <Star className="h-4 w-4" />
-                    {item.ratings_count} Ratings
+                    {item.ratings_count || 0} Ratings
                   </span>
                 </div>
               </div>

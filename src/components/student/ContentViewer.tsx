@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,11 +12,11 @@ import { logActivity } from '@/utils/activityLogger';
 interface ContentItem {
   id: string;
   title: string;
-  description: string;
+  description: string | null;
   file_url: string;
-  file_type: 'video' | 'document' | 'presentation' | 'other';
+  file_type: string;
   file_name: string;
-  tags: string[];
+  tags: string[] | null;
   created_at: string;
   instructor_channels: {
     channel_name: string;
@@ -34,8 +33,8 @@ interface Comment {
   comment_text: string;
   created_at: string;
   profiles: {
-    full_name: string;
-  };
+    full_name: string | null;
+  } | null;
 }
 
 export const ContentViewer = () => {
@@ -137,8 +136,11 @@ export const ContentViewer = () => {
       const { data, error } = await supabase
         .from('content_comments')
         .select(`
-          *,
-          profiles(full_name)
+          id,
+          comment_text,
+          created_at,
+          user_id,
+          profiles!inner(full_name)
         `)
         .eq('content_id', contentId)
         .order('created_at', { ascending: false });
@@ -147,6 +149,7 @@ export const ContentViewer = () => {
       setComments(data || []);
     } catch (error) {
       console.error('Error fetching comments:', error);
+      setComments([]);
     }
   };
 
@@ -347,15 +350,15 @@ export const ContentViewer = () => {
                 <div className="flex items-center gap-4 text-sm text-gray-600">
                   <span className="flex items-center gap-1">
                     <Heart className="h-4 w-4" />
-                    {item.likes_count}
+                    {item.likes_count || 0}
                   </span>
                   <span className="flex items-center gap-1">
                     <MessageSquare className="h-4 w-4" />
-                    {item.comments_count}
+                    {item.comments_count || 0}
                   </span>
                   <span className="flex items-center gap-1">
                     <Star className="h-4 w-4" />
-                    {item.avg_rating > 0 ? item.avg_rating.toFixed(1) : 'No ratings'}
+                    {item.avg_rating && item.avg_rating > 0 ? item.avg_rating.toFixed(1) : 'No ratings'}
                   </span>
                 </div>
               </div>

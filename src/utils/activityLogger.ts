@@ -20,7 +20,12 @@ export type ActivityType =
   | 'instructor_rate'
   | 'video_like'
   | 'video_comment'
-  | 'video_share';
+  | 'video_share'
+  | 'content_view'
+  | 'content_like'
+  | 'content_comment'
+  | 'content_rate'
+  | 'content_report';
 
 export interface ActivityMetadata {
   title?: string;
@@ -43,7 +48,11 @@ export interface ActivityMetadata {
   file_name?: string;
   tags?: string[];
   description?: string;
-  action?: string; // Added to fix the error
+  action?: string;
+  content_id?: string;
+  content_type?: string;
+  channel_name?: string;
+  file_type?: string;
 }
 
 /**

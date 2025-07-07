@@ -3,7 +3,8 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Play, Calendar, ExternalLink } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Play, Calendar, ExternalLink, Video, BookOpen } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import InformationCollectionModal from "@/components/auth/InformationCollectionModal";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
@@ -11,6 +12,7 @@ import { RecentActivitiesCard } from "@/components/dashboard/RecentActivities";
 import { CourseProgressCard } from "@/components/dashboard/CourseProgressList";
 import { CertificateActions } from "@/components/student/CertificateActions";
 import { DynamicRecommendations } from "@/components/DynamicRecommendations";
+import { ContentViewer } from "@/components/student/ContentViewer";
 import { useAuth } from "@/context/AuthContext";
 import { useUserActivities } from "@/hooks/useUserActivities";
 import { getUserActivitySummary, logDashboardVisit } from "@/utils/activityLogger";
@@ -89,91 +91,127 @@ const StudentDashboard = () => {
       {/* Stats Cards */}
       <DashboardStats isLoading={activitiesLoading} />
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        {/* Left Column - Course Progress & Activities */}
-        <div className="xl:col-span-2 space-y-8">
-          {/* Course Progress */}
+      {/* Main Content with Tabs */}
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid w-full grid-cols-4 mb-8">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="content">Instructor Content</TabsTrigger>
+          <TabsTrigger value="courses">My Courses</TabsTrigger>
+          <TabsTrigger value="certificates">Certificates</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-8">
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            {/* Left Column - Course Progress & Activities */}
+            <div className="xl:col-span-2 space-y-8">
+              {/* Course Progress */}
+              <div className="animate-fade-in delay-200">
+                <CourseProgressCard 
+                  courseProgress={courseProgress} 
+                  isLoading={activitiesLoading} 
+                />
+              </div>
+
+              {/* Upcoming Sessions */}
+              <Card className="glass-morphism animate-fade-in delay-300">
+                <CardHeader>
+                  <CardTitle className="text-xl text-white flex items-center gap-2">
+                    <Calendar className="text-blue-400" size={20} />
+                    Upcoming Live Sessions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {upcomingSessions.map((session) => (
+                      <div 
+                        key={session.id} 
+                        className="p-4 bg-black/30 rounded-lg border border-white/5 hover:border-purple-500/30 transition-all"
+                      >
+                        <h4 className="font-medium text-white mb-2">{session.title}</h4>
+                        <div className="flex items-center text-sm text-gray-300 mb-2">
+                          <Calendar className="h-4 w-4 mr-2 text-blue-400" />
+                          {session.date}
+                        </div>
+                        <p className="text-sm text-gray-400 mb-3">
+                          Instructor: {session.instructor}
+                        </p>
+                        <Link to={session.link}>
+                          <Button 
+                            size="sm" 
+                            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 btn-hover"
+                          >
+                            <Play className="h-4 w-4 mr-2" />
+                            Join Session
+                          </Button>
+                        </Link>
+                      </div>
+                    ))}
+                    <Link to="/live-sessions">
+                      <Button 
+                        variant="outline" 
+                        className="w-full border-white/20 text-white hover:bg-white/10 btn-hover"
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        View All Sessions
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Right Column - Activities & Recommendations */}
+            <div className="space-y-8">
+              {/* Recent Activities */}
+              <div className="animate-fade-in delay-400">
+                <RecentActivitiesCard 
+                  activities={recentActivities} 
+                  isLoading={activitiesLoading} 
+                />
+              </div>
+
+              {/* Smart Recommendations */}
+              <div className="animate-fade-in delay-500">
+                <DynamicRecommendations 
+                  activities={activities}
+                  activitySummary={activitySummary}
+                  isLoading={activitiesLoading}
+                />
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="content">
+          <Card className="glass-morphism">
+            <CardHeader>
+              <CardTitle className="text-xl text-white flex items-center gap-2">
+                <Video className="text-purple-400" size={20} />
+                Instructor Content
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ContentViewer />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="courses">
           <div className="animate-fade-in delay-200">
             <CourseProgressCard 
               courseProgress={courseProgress} 
               isLoading={activitiesLoading} 
             />
           </div>
+        </TabsContent>
 
-          {/* Certificates Section */}
+        <TabsContent value="certificates">
           <div className="animate-fade-in delay-250">
             <CertificateActions certificates={certificates} />
           </div>
-
-          {/* Upcoming Sessions */}
-          <Card className="glass-morphism animate-fade-in delay-300">
-            <CardHeader>
-              <CardTitle className="text-xl text-white flex items-center gap-2">
-                <Calendar className="text-blue-400" size={20} />
-                Upcoming Live Sessions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {upcomingSessions.map((session) => (
-                  <div 
-                    key={session.id} 
-                    className="p-4 bg-black/30 rounded-lg border border-white/5 hover:border-purple-500/30 transition-all"
-                  >
-                    <h4 className="font-medium text-white mb-2">{session.title}</h4>
-                    <div className="flex items-center text-sm text-gray-300 mb-2">
-                      <Calendar className="h-4 w-4 mr-2 text-blue-400" />
-                      {session.date}
-                    </div>
-                    <p className="text-sm text-gray-400 mb-3">
-                      Instructor: {session.instructor}
-                    </p>
-                    <Link to={session.link}>
-                      <Button 
-                        size="sm" 
-                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 btn-hover"
-                      >
-                        <Play className="h-4 w-4 mr-2" />
-                        Join Session
-                      </Button>
-                    </Link>
-                  </div>
-                ))}
-                <Link to="/live-sessions">
-                  <Button 
-                    variant="outline" 
-                    className="w-full border-white/20 text-white hover:bg-white/10 btn-hover"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    View All Sessions
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right Column - Activities & Recommendations */}
-        <div className="space-y-8">
-          {/* Recent Activities */}
-          <div className="animate-fade-in delay-400">
-            <RecentActivitiesCard 
-              activities={recentActivities} 
-              isLoading={activitiesLoading} 
-            />
-          </div>
-
-          {/* Smart Recommendations */}
-          <div className="animate-fade-in delay-500">
-            <DynamicRecommendations 
-              activities={activities}
-              activitySummary={activitySummary}
-              isLoading={activitiesLoading}
-            />
-          </div>
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
 
       {/* Quick Actions */}
       <div className="mt-12 animate-fade-in delay-600">

@@ -6,39 +6,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import { Upload, Video, Plus, X } from 'lucide-react';
+import { Upload, Video } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
 import { logActivity } from '@/utils/activityLogger';
 
 export const VideoUpload = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    tags: [''],
+    tags: '',
     file: null as File | null
   });
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
-
-  const handleAddTag = () => {
-    setFormData(prev => ({
-      ...prev,
-      tags: [...prev.tags, '']
-    }));
-  };
-
-  const handleRemoveTag = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      tags: prev.tags.filter((_, i) => i !== index)
-    }));
-  };
-
-  const handleTagChange = (index: number, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      tags: prev.tags.map((tag, i) => i === index ? value : tag)
-    }));
-  };
+  const { user } = useAuth();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -57,7 +39,7 @@ export const VideoUpload = () => {
       if (file.size > 100 * 1024 * 1024) {
         toast({
           title: "File too large",
-          description: "Video file must be less than 100MB",
+          description: "Video must be less than 100MB",
           variant: "destructive"
         });
         return;
@@ -67,13 +49,43 @@ export const VideoUpload = () => {
     }
   };
 
+  const ensureInstructorChannel = async () => {
+    if (!user) return null;
+
+    // Check if instructor channel exists
+    const { data: existingChannel } = await supabase
+      .from('instructor_channels')
+      .select('id')
+      .eq('instructor_id', user.id)
+      .single();
+
+    if (existingChannel) {
+      return existingChannel.id;
+    }
+
+    // Create instructor channel
+    const channelName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Instructor';
+    const { data: newChannel, error } = await supabase
+      .from('instructor_channels')
+      .insert({
+        instructor_id: user.id,
+        channel_name: channelName,
+        description: `${channelName}'s Channel`
+      })
+      .select('id')
+      .single();
+
+    if (error) throw error;
+    return newChannel.id;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title || !formData.file) {
+    if (!formData.title || !formData.file || !user) {
       toast({
         title: "Missing fields",
-        description: "Please provide a title and select a video file",
+        description: "Please fill in all required fields",
         variant: "destructive"
       });
       return;
@@ -82,16 +94,50 @@ export const VideoUpload = () => {
     setUploading(true);
     
     try {
-      // Mock video upload - replace with actual Supabase storage upload
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Ensure instructor channel exists
+      const channelId = await ensureInstructorChannel();
+      if (!channelId) throw new Error('Failed to create/find instructor channel');
+
+      // Upload file to Supabase Storage
+      const fileExt = formData.file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       
-      const videoId = Math.random().toString(36).substr(2, 9);
+      const { error: uploadError } = await supabase.storage
+        .from('content-uploads')
+        .upload(`videos/${fileName}`, formData.file);
+
+      if (uploadError) throw uploadError;
+
+      // Get file URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('content-uploads')
+        .getPublicUrl(`videos/${fileName}`);
+
+      // Save to database
+      const tagsArray = formData.tags.split(',').map(tag => tag.trim()).filter(Boolean);
       
-      await logActivity('video_upload', videoId, 'video', {
+      const { data: uploadData, error: dbError } = await supabase
+        .from('content_uploads')
+        .insert({
+          instructor_id: user.id,
+          channel_id: channelId,
+          title: formData.title,
+          description: formData.description,
+          file_url: publicUrl,
+          file_type: 'video',
+          file_name: formData.file.name,
+          file_size: formData.file.size,
+          tags: tagsArray
+        })
+        .select()
+        .single();
+
+      if (dbError) throw dbError;
+
+      await logActivity('video_upload', uploadData.id, 'video', {
         title: formData.title,
-        description: formData.description,
-        tags: formData.tags.filter(tag => tag.trim() !== ''),
-        file_name: formData.file.name
+        file_name: formData.file.name,
+        tags: tagsArray
       });
 
       toast({
@@ -103,7 +149,7 @@ export const VideoUpload = () => {
       setFormData({
         title: '',
         description: '',
-        tags: [''],
+        tags: '',
         file: null
       });
       
@@ -134,9 +180,9 @@ export const VideoUpload = () => {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="title">Video Title</Label>
+            <Label htmlFor="video-title">Video Title</Label>
             <Input
-              id="title"
+              id="video-title"
               value={formData.title}
               onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
               placeholder="Enter video title..."
@@ -145,54 +191,28 @@ export const VideoUpload = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="video-description">Description</Label>
             <Textarea
-              id="description"
+              id="video-description"
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Describe your video content..."
+              placeholder="Enter video description..."
               rows={4}
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Tags</Label>
-            <div className="space-y-2">
-              {formData.tags.map((tag, index) => (
-                <div key={index} className="flex gap-2">
-                  <Input
-                    value={tag}
-                    onChange={(e) => handleTagChange(index, e.target.value)}
-                    placeholder="Add a tag..."
-                    className="flex-1"
-                  />
-                  {formData.tags.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={() => handleRemoveTag(index)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleAddTag}
-                className="w-full"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Tag
-              </Button>
-            </div>
+            <Label htmlFor="video-tags">Tags (comma-separated)</Label>
+            <Input
+              id="video-tags"
+              value={formData.tags}
+              onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
+              placeholder="e.g., programming, tutorial, javascript"
+            />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="video-file">Video File</Label>
+            <Label htmlFor="video-file">Upload Video</Label>
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
               <div className="text-center">
                 <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
@@ -210,7 +230,7 @@ export const VideoUpload = () => {
                     </p>
                   )}
                   <p className="text-xs text-gray-500">
-                    Maximum file size: 100MB
+                    Supported: MP4, MOV, AVI, WMV (Max: 100MB)
                   </p>
                 </div>
               </div>

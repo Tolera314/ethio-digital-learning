@@ -143,11 +143,15 @@ const InstructorDashboard = () => {
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                    <p className="text-sm text-gray-300">Assignment submitted for JavaScript Basics</p>
+                    <p className="text-sm text-gray-300">Video uploaded: "Advanced React Hooks"</p>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                    <p className="text-sm text-gray-300">Live session scheduled for tomorrow</p>
+                    <p className="text-sm text-gray-300">New comment on JavaScript Tutorial</p>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                    <p className="text-sm text-gray-300">Course material downloaded 15 times</p>
                   </div>
                 </div>
               </CardContent>
@@ -162,17 +166,23 @@ const InstructorDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <button className="w-full text-left p-3 rounded-lg hover:bg-white/10 transition-colors text-white">
-                    Create New Course
+                  <button 
+                    onClick={() => setActiveTab('videos')}
+                    className="w-full text-left p-3 rounded-lg hover:bg-white/10 transition-colors text-white"
+                  >
+                    Upload New Video
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('materials')}
+                    className="w-full text-left p-3 rounded-lg hover:bg-white/10 transition-colors text-white"
+                  >
+                    Upload Course Material
                   </button>
                   <button className="w-full text-left p-3 rounded-lg hover:bg-white/10 transition-colors text-white">
                     Schedule Live Session
                   </button>
                   <button className="w-full text-left p-3 rounded-lg hover:bg-white/10 transition-colors text-white">
-                    Grade Assignments
-                  </button>
-                  <button className="w-full text-left p-3 rounded-lg hover:bg-white/10 transition-colors text-white">
-                    View Student Progress
+                    View Student Interactions
                   </button>
                 </div>
               </CardContent>

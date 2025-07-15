@@ -7,6 +7,8 @@ import PageLayout from "@/components/PageLayout";
 import { useAuth } from "@/context/AuthContext";
 import { useUserActivities } from "@/hooks/useUserActivities";
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { getUserActivitySummary } from "@/utils/activityLogger";
 
 const Index = () => {
@@ -20,6 +22,44 @@ const Index = () => {
     totalBooks: 0
   });
   const [personalizedRecommendations, setPersonalizedRecommendations] = useState([]);
+
+  // Fetch books data
+  const { data: books = [] } = useQuery({
+    queryKey: ['books'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('books')
+        .select('*')
+        .limit(6);
+      
+      if (error) {
+        console.error('Error fetching books:', error);
+        return [];
+      }
+      return data || [];
+    },
+  });
+
+  // Fetch reading sessions data
+  const { data: sessions = [] } = useQuery({
+    queryKey: ['reading-sessions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('reading_sessions')
+        .select(`
+          *,
+          books (title, author)
+        `)
+        .eq('is_active', true)
+        .limit(3);
+      
+      if (error) {
+        console.error('Error fetching sessions:', error);
+        return [];
+      }
+      return data || [];
+    },
+  });
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -465,50 +505,32 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Featured Courses Preview */}
+          {/* Featured Books Preview */}
           <div className="animate-fade-in delay-700">
             <h2 className="text-3xl font-bold text-white mb-8 text-center">
-              Most Popular Courses
+              Featured Books & Resources
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                {
-                  title: "Full Stack Web Development",
-                  description: "Master React, Node.js, and modern web technologies",
-                  students: "2,340 students",
-                  rating: 4.8,
-                  image: "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?auto=format&fit=crop&w=800&q=80"
-                },
-                {
-                  title: "UI/UX Design Fundamentals",
-                  description: "Create beautiful and user-friendly digital experiences",
-                  students: "1,890 students",
-                  rating: 4.9,
-                  image: "https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=800&q=80"
-                },
-                {
-                  title: "Data Science with Python",
-                  description: "Analyze data and build machine learning models",
-                  students: "1,567 students",
-                  rating: 4.7,
-                  image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80"
-                }
-              ].map((course, index) => (
-                <Card key={index} className="bg-black/40 border border-white/10 backdrop-blur-lg hover:scale-105 transition-all duration-300 cursor-pointer animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+              {books.slice(0, 3).map((book, index) => (
+                <Card key={book.id} className="bg-black/40 border border-white/10 backdrop-blur-lg hover:scale-105 transition-all duration-300 cursor-pointer animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
                   <div className="aspect-video overflow-hidden rounded-t-lg">
-                    <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
+                    <img 
+                      src={book.cover_image || "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=800&q=80"} 
+                      alt={book.title} 
+                      className="w-full h-full object-cover" 
+                    />
                   </div>
                   <CardHeader>
-                    <CardTitle className="text-lg text-white">{course.title}</CardTitle>
+                    <CardTitle className="text-lg text-white">{book.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-300 mb-4">{course.description}</p>
+                    <p className="text-gray-300 mb-2">by {book.author}</p>
+                    <p className="text-gray-400 text-sm mb-4">{book.description || "Expand your knowledge with this comprehensive resource."}</p>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-400">{course.students}</span>
-                      <div className="flex items-center gap-1">
-                        <Star size={16} className="text-yellow-400 fill-current" />
-                        <span className="text-sm text-gray-300">{course.rating}</span>
-                      </div>
+                      <Badge variant="secondary" className="bg-blue-600/20 text-blue-300">
+                        {book.category}
+                      </Badge>
+                      <span className="text-sm text-gray-400">{book.publication_year}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -517,15 +539,57 @@ const Index = () => {
             
             <div className="text-center mt-8">
               <Button 
-                onClick={() => navigate('/courses')} 
+                onClick={() => navigate('/library')} 
                 variant="outline" 
                 className="border-white/20 hover:bg-white/10 text-white font-semibold px-8 py-3 btn-hover"
               >
-                View All Courses
+                Explore Library
                 <ArrowRight size={16} className="ml-2" />
               </Button>
             </div>
           </div>
+
+          {/* Active Reading Sessions */}
+          {sessions.length > 0 && (
+            <div className="animate-fade-in delay-800">
+              <h2 className="text-3xl font-bold text-white mb-8 text-center">
+                Join Live Reading Sessions
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {sessions.map((session, index) => (
+                  <Card key={session.id} className="bg-black/40 border border-white/10 backdrop-blur-lg hover:scale-105 transition-all duration-300 cursor-pointer animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+                    <CardHeader>
+                      <CardTitle className="text-lg text-white flex items-center gap-2">
+                        <Play className="text-green-400" size={20} />
+                        {session.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-blue-300 mb-2">
+                        Book: {session.books?.title || 'Book Title'}
+                      </p>
+                      <p className="text-gray-300 mb-4">{session.description}</p>
+                      <div className="flex items-center justify-between text-sm text-gray-400">
+                        <span>Starting soon</span>
+                        <Badge className="bg-green-600/20 text-green-300">Live</Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              
+              <div className="text-center mt-8">
+                <Button 
+                  onClick={() => navigate('/live-sessions')} 
+                  variant="outline" 
+                  className="border-green-500/50 hover:bg-green-500/10 text-white font-semibold px-8 py-3 btn-hover"
+                >
+                  View All Sessions
+                  <ArrowRight size={16} className="ml-2" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </PageLayout>

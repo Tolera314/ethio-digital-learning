@@ -5,6 +5,27 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/components/ui/use-toast";
 import { logActivity } from '@/utils/activityLogger';
 
+// Create a trigger function to automatically assign roles
+const createUserRoleOnSignup = async (user: User) => {
+  try {
+    // Check if role already exists
+    const { data: existingRole } = await supabase
+      .from('user_roles')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (!existingRole) {
+      // Create default student role
+      await supabase
+        .from('user_roles')
+        .insert({ user_id: user.id, role: 'student' });
+    }
+  } catch (error) {
+    console.error('Error creating user role:', error);
+  }
+};
+
 type AuthContextType = {
   session: Session | null;
   user: User | null;
@@ -32,10 +53,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             variant: "default",
           });
           
-          // Log sign in activity
-          setTimeout(() => {
-            logActivity('login');
-          }, 0);
+          // Create user role if it doesn't exist and log activity
+          if (currentSession?.user) {
+            setTimeout(() => {
+              createUserRoleOnSignup(currentSession.user);
+              logActivity('login');
+            }, 0);
+          }
         } else if (event === 'SIGNED_OUT') {
           toast({
             title: "Signed out",
@@ -60,9 +84,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(currentSession?.user ?? null);
       setIsLoading(false);
       
-      // Log activity if user is already logged in
+      // Log activity and create role if user is already logged in
       if (currentSession?.user) {
         setTimeout(() => {
+          createUserRoleOnSignup(currentSession.user);
           logActivity('login');
         }, 0);
       }

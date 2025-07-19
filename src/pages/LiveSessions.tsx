@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, Users, Video, Calendar as CalendarIcon, Bell, Plus } from "lucide-react";
+import { Calendar, Clock, Users, Video, Calendar as CalendarIcon, Bell, Plus, Loader2 } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CreateSessionModal from "@/components/CreateSessionModal";
@@ -13,6 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useRole } from "@/hooks/useRole";
+import { format } from "date-fns";
 
 const initialUpcomingSessions = [
   {
@@ -159,17 +161,38 @@ const LiveSessions = () => {
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [selectedSession, setSelectedSession] = useState<any>(null);
   const [activeVideoCall, setActiveVideoCall] = useState<boolean>(false);
-  const [upcomingSessions, setUpcomingSessions] = useState(initialUpcomingSessions);
+  const [upcomingSessions, setUpcomingSessions] = useState<any[]>([]);
+  const [pastSessions, setPastSessions] = useState<any[]>([]);
   const [userData, setUserData] = useState<{ username: string, email: string } | null>(null);
   const [isHost, setIsHost] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { user } = useAuth();
+  const { role } = useRole();
   const navigate = useNavigate();
 
-  // Get user data from session on page load
+  // Load sessions from database
   useEffect(() => {
-    async function getUserData() {
+    async function loadSessions() {
       try {
+        setLoading(true);
+        
+        // Load live sessions
+        const { data: sessions, error } = await (supabase as any)
+          .from('live_sessions')
+          .select('*')
+          .order('start_time', { ascending: true });
+
+        if (error) throw error;
+
+        const now = new Date();
+        const upcoming = sessions?.filter(s => new Date(s.start_time) > now) || [];
+        const past = sessions?.filter(s => new Date(s.start_time) <= now) || [];
+
+        setUpcomingSessions(upcoming);
+        setPastSessions(past);
+
+        // Get user data
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           const email = session.user.email || "";
@@ -180,22 +203,55 @@ const LiveSessions = () => {
           setUserData({ username, email });
         }
       } catch (error) {
-        console.error("Error getting user data:", error);
+        console.error("Error loading sessions:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load sessions",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
       }
     }
 
-    getUserData();
-  }, [user]);
+    loadSessions();
+  }, [user, toast]);
 
-  const handleCreateSession = (newSession: any) => {
-    setUpcomingSessions([newSession, ...upcomingSessions]);
-    setSelectedSession(newSession);
-    setIsHost(true);
-    setActiveVideoCall(true);
-    toast({
-      title: "Session Created",
-      description: "Your live session has been successfully created and started"
-    });
+  const handleCreateSession = async (newSession: any) => {
+    try {
+      // Save to database
+      const { data, error } = await (supabase as any)
+        .from('live_sessions')
+        .insert({
+          title: newSession.title,
+          description: newSession.description,
+          host_id: user?.id,
+          start_time: newSession.start_time,
+          end_time: newSession.end_time,
+          max_participants: newSession.max_participants || 100
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setUpcomingSessions([data, ...upcomingSessions]);
+      setSelectedSession(data);
+      setIsHost(true);
+      setActiveVideoCall(true);
+      
+      toast({
+        title: "Session Created",
+        description: "Your live session has been successfully created and started"
+      });
+    } catch (error) {
+      console.error("Error creating session:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create session",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleJoinSessionClick = (session: any) => {
@@ -281,12 +337,14 @@ const LiveSessions = () => {
     >
       <div className="w-full max-w-7xl mx-auto px-4">
         <div className="flex justify-end mb-6">
-          <Button
-            className="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white"
-            onClick={handleHostNewSession}
-          >
-            <Plus className="mr-2 h-4 w-4" /> Host New Session
-          </Button>
+          {(role === 'instructor' || role === 'admin') && (
+            <Button
+              className="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white"
+              onClick={handleHostNewSession}
+            >
+              <Plus className="mr-2 h-4 w-4" /> Host New Session
+            </Button>
+          )}
         </div>
 
         <Tabs defaultValue="upcoming" className="w-full">
@@ -323,11 +381,17 @@ const LiveSessions = () => {
           </TabsContent>
 
           <TabsContent value="past" className="mt-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {pastSessions.map(session => (
-                <SessionCard key={session.id} session={session} isPast={true} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {pastSessions.map(session => (
+                  <SessionCard key={session.id} session={session} isPast={true} />
+                ))}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>

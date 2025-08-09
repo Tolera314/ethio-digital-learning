@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import { ErrorBoundary } from "./components/layout/ErrorBoundary";
+import { SEOHead } from "./components/layout/SEOHead";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
@@ -34,99 +35,103 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/auth" element={<Auth />} />
-            
-            {/* Protected Student Routes */}
-            <Route path="/dashboard" element={
-              <ProtectedRoute requiredRole="student">
-                <StudentDashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/courses" element={
-              <ProtectedRoute requiredRole="student">
-                <Courses />
-              </ProtectedRoute>
-            } />
-            <Route path="/courses/:courseId" element={
-              <ProtectedRoute requiredRole="student">
-                <CourseDetails />
-              </ProtectedRoute>
-            } />
-            <Route path="/courses/:courseId/learn" element={
-              <ProtectedRoute requiredRole="student">
-                <CourseLearning />
-              </ProtectedRoute>
-            } />
-            <Route path="/certificates" element={
-              <ProtectedRoute requiredRole="student">
-                <Certificates />
-              </ProtectedRoute>
-            } />
-            <Route path="/progress" element={
-              <ProtectedRoute requiredRole="student">
-                <ProgressTracking />
-              </ProtectedRoute>
-            } />
-            <Route path="/live-sessions" element={
-              <ProtectedRoute requiredRole="student">
-                <LiveSessions />
-              </ProtectedRoute>
-            } />
-            <Route path="/payment" element={
-              <ProtectedRoute requiredRole="student">
-                <Payment />
-              </ProtectedRoute>
-            } />
-            <Route path="/library" element={
-              <ProtectedRoute requiredRole="student">
-                <Library />
-              </ProtectedRoute>
-            } />
-            <Route path="/books/:bookId" element={
-              <ProtectedRoute requiredRole="student">
-                <BookDetails />
-              </ProtectedRoute>
-            } />
-            <Route path="/books/:bookId/sessions/:sessionId" element={
-              <ProtectedRoute requiredRole="student">
-                <ReadingSession />
-              </ProtectedRoute>
-            } />
+function App() {
+  return (
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <SEOHead />
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<Index />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/auth" element={<Auth />} />
+                
+                {/* Protected Student Routes */}
+                <Route path="/dashboard" element={
+                  <ProtectedRoute requiredRole="student">
+                    <StudentDashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/courses" element={
+                  <ProtectedRoute requiredRole="student">
+                    <Courses />
+                  </ProtectedRoute>
+                } />
+                <Route path="/courses/:courseId" element={
+                  <ProtectedRoute requiredRole="student">
+                    <CourseDetails />
+                  </ProtectedRoute>
+                } />
+                <Route path="/courses/:courseId/learn" element={
+                  <ProtectedRoute requiredRole="student">
+                    <CourseLearning />
+                  </ProtectedRoute>
+                } />
+                <Route path="/certificates" element={
+                  <ProtectedRoute requiredRole="student">
+                    <Certificates />
+                  </ProtectedRoute>
+                } />
+                <Route path="/progress" element={
+                  <ProtectedRoute requiredRole="student">
+                    <ProgressTracking />
+                  </ProtectedRoute>
+                } />
+                <Route path="/live-sessions" element={
+                  <ProtectedRoute requiredRole="student">
+                    <LiveSessions />
+                  </ProtectedRoute>
+                } />
+                <Route path="/payment" element={
+                  <ProtectedRoute requiredRole="student">
+                    <Payment />
+                  </ProtectedRoute>
+                } />
+                <Route path="/library" element={
+                  <ProtectedRoute requiredRole="student">
+                    <Library />
+                  </ProtectedRoute>
+                } />
+                <Route path="/books/:bookId" element={
+                  <ProtectedRoute requiredRole="student">
+                    <BookDetails />
+                  </ProtectedRoute>
+                } />
+                <Route path="/books/:bookId/sessions/:sessionId" element={
+                  <ProtectedRoute requiredRole="student">
+                    <ReadingSession />
+                  </ProtectedRoute>
+                } />
 
-            {/* Protected Instructor Routes */}
-            <Route path="/instructor" element={
-              <ProtectedRoute requiredRole="instructor">
-                <InstructorDashboard />
-              </ProtectedRoute>
-            } />
+                {/* Protected Instructor Routes */}
+                <Route path="/instructor" element={
+                  <ProtectedRoute requiredRole="instructor">
+                    <InstructorDashboard />
+                  </ProtectedRoute>
+                } />
 
-            {/* Protected Admin Routes */}
-            <Route path="/admin" element={
-              <ProtectedRoute requiredRole="admin">
-                <AdminDashboard />
-              </ProtectedRoute>
-            } />
+                {/* Protected Admin Routes */}
+                <Route path="/admin" element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                } />
 
-            {/* 404 Route */}
-            <Route path="*" element={<NotFound />} />
+                {/* 404 Route */}
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
           </TooltipProvider>
         </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>
-);
+  );
+}
 
 export default App;

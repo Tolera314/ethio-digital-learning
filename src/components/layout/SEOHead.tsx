@@ -94,7 +94,7 @@ export const SEOHead = ({
       })
     }
 
-    let jsonLd = document.querySelector('#structured-data')
+    let jsonLd = document.querySelector('#structured-data') as HTMLScriptElement
     if (!jsonLd) {
       jsonLd = document.createElement('script')
       jsonLd.id = 'structured-data'

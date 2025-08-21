@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -778,13 +778,53 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      session_participants_public: {
+        Row: {
+          email: string | null
+          id: string | null
+          is_active: boolean | null
+          joined_at: string | null
+          left_at: string | null
+          session_id: string | null
+          user_id: string | null
+          username: string | null
+        }
+        Insert: {
+          email?: never
+          id?: string | null
+          is_active?: boolean | null
+          joined_at?: string | null
+          left_at?: string | null
+          session_id?: string | null
+          user_id?: string | null
+          username?: string | null
+        }
+        Update: {
+          email?: never
+          id?: string | null
+          is_active?: boolean | null
+          joined_at?: string | null
+          left_at?: string | null
+          session_id?: string | null
+          user_id?: string | null
+          username?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_session_participants_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "live_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       check_rate_limit: {
         Args: {
-          _identifier: string
           _endpoint: string
+          _identifier: string
           _max_requests?: number
           _window_minutes?: number
         }
@@ -800,20 +840,20 @@ export type Database = {
       }
       has_role: {
         Args: {
-          _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
         }
         Returns: boolean
       }
       log_security_event: {
         Args: {
-          _event_type: string
-          _user_id?: string
-          _ip_address?: unknown
-          _user_agent?: string
-          _endpoint?: string
-          _success?: boolean
           _details?: Json
+          _endpoint?: string
+          _event_type: string
+          _ip_address?: unknown
+          _success?: boolean
+          _user_agent?: string
+          _user_id?: string
         }
         Returns: undefined
       }

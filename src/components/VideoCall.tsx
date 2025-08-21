@@ -100,9 +100,9 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
       // Set up presence tracking for participants
       channel.subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
-          // Add current user to presence
+          // Add current user to presence (only share email if host)
           await channel.track({
-            id: email,
+            id: isHost ? email : `user_${Math.random().toString(36).substr(2, 9)}`,
             username: username,
             isVideoOn,
             isAudioOn,

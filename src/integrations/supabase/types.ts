@@ -778,47 +778,7 @@ export type Database = {
       }
     }
     Views: {
-      session_participants_public: {
-        Row: {
-          email: string | null
-          id: string | null
-          is_active: boolean | null
-          joined_at: string | null
-          left_at: string | null
-          session_id: string | null
-          user_id: string | null
-          username: string | null
-        }
-        Insert: {
-          email?: never
-          id?: string | null
-          is_active?: boolean | null
-          joined_at?: string | null
-          left_at?: string | null
-          session_id?: string | null
-          user_id?: string | null
-          username?: string | null
-        }
-        Update: {
-          email?: never
-          id?: string | null
-          is_active?: boolean | null
-          joined_at?: string | null
-          left_at?: string | null
-          session_id?: string | null
-          user_id?: string | null
-          username?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "live_session_participants_session_id_fkey"
-            columns: ["session_id"]
-            isOneToOne: false
-            referencedRelation: "live_sessions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       check_rate_limit: {
@@ -833,6 +793,19 @@ export type Database = {
       generate_verification_code: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_session_participants: {
+        Args: { session_uuid: string }
+        Returns: {
+          email: string
+          id: string
+          is_active: boolean
+          joined_at: string
+          left_at: string
+          session_id: string
+          user_id: string
+          username: string
+        }[]
       }
       get_user_role: {
         Args: { _user_id: string }

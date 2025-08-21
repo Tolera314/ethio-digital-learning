@@ -32,6 +32,8 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
   const [isVideoOn, setIsVideoOn] = useState(true);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [participants, setParticipants] = useState<Participant[]>([]);
+  // Generate secure participant ID (only share email if host)
+  const participantId = isHost ? email : `user_${Math.random().toString(36).substr(2, 9)}`;
   // For hosts, automatically start the session
   const [hasStartedSession, setHasStartedSession] = useState(true);
   const [chatPanelOpen, setChatPanelOpen] = useState(false);
@@ -102,7 +104,7 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
         if (status === 'SUBSCRIBED') {
           // Add current user to presence (only share email if host)
           await channel.track({
-            id: isHost ? email : `user_${Math.random().toString(36).substr(2, 9)}`,
+            id: participantId,
             username: username,
             isVideoOn,
             isAudioOn,
@@ -202,7 +204,7 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
         type: 'broadcast',
         event: 'status-update',
         payload: {
-          id: email,
+          id: participantId,
           isVideoOn,
           isAudioOn
         }
@@ -306,7 +308,7 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
       // Update status in presence
       const channel = supabase.channel(`session-${sessionId}`);
       await channel.track({
-        id: email,
+        id: participantId,
         username: username,
         isVideoOn,
         isAudioOn,
@@ -341,7 +343,7 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
           // Update status in presence
           const channel = supabase.channel(`session-${sessionId}`);
           channel.track({
-            id: email,
+            id: participantId,
             username: username,
             isVideoOn,
             isAudioOn,
@@ -355,7 +357,7 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
         // Update status in presence
         const channel = supabase.channel(`session-${sessionId}`);
         await channel.track({
-          id: email,
+          id: participantId,
           username: username,
           isVideoOn,
           isAudioOn,
@@ -665,7 +667,7 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
             </div>
 
             {/* Remote participants */}
-            {participants.filter(p => p.id !== email).map((participant) => (
+            {participants.filter(p => p.id !== participantId).map((participant) => (
               <div 
                 key={participant.id} 
                 className={`relative bg-gray-900 rounded-lg overflow-hidden ${layout === "gallery" 

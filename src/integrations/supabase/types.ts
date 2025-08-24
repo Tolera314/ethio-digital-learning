@@ -778,47 +778,7 @@ export type Database = {
       }
     }
     Views: {
-      session_participants_safe: {
-        Row: {
-          email: string | null
-          id: string | null
-          is_active: boolean | null
-          joined_at: string | null
-          left_at: string | null
-          session_id: string | null
-          user_id: string | null
-          username: string | null
-        }
-        Insert: {
-          email?: never
-          id?: string | null
-          is_active?: boolean | null
-          joined_at?: string | null
-          left_at?: string | null
-          session_id?: string | null
-          user_id?: string | null
-          username?: string | null
-        }
-        Update: {
-          email?: never
-          id?: string | null
-          is_active?: boolean | null
-          joined_at?: string | null
-          left_at?: string | null
-          session_id?: string | null
-          user_id?: string | null
-          username?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "live_session_participants_session_id_fkey"
-            columns: ["session_id"]
-            isOneToOne: false
-            referencedRelation: "live_sessions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       check_rate_limit: {

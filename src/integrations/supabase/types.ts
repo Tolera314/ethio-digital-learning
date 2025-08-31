@@ -794,6 +794,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_session_access: {
+        Args: { session_uuid: string }
+        Returns: boolean
+      }
       get_session_participants: {
         Args: { session_uuid: string }
         Returns: {

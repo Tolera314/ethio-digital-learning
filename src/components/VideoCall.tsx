@@ -97,12 +97,20 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
       initializeMediaStreams();
       
       // Announce user join to the channel using Supabase Realtime
-      const channel = supabase.channel(`session-${sessionId}`);
+      const channel = supabase.channel(`live-session-${sessionId}`, {
+        config: {
+          presence: {
+            key: participantId,
+          },
+        },
+      });
       
       // Set up presence tracking for participants
       channel.subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
-          // Add current user to presence (only share email if host)
+          console.log('VideoCall: Channel subscribed successfully');
+          
+          // Track participant presence
           await channel.track({
             id: participantId,
             username: username,
@@ -123,12 +131,14 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
               isScreenSharing: p.isScreenSharing || false
             }));
             
+            console.log('VideoCall: Participants updated:', presentParticipants.length);
             setParticipants(presentParticipants as Participant[]);
           });
           
           // Listen for broadcast messages (chat)
           channel.on('broadcast', { event: 'chat' }, (payload) => {
             if (payload.payload && payload.payload.message) {
+              console.log('VideoCall: New chat message received');
               setMessages(prev => [...prev, {
                 sender: payload.payload.sender,
                 text: payload.payload.message,
@@ -136,19 +146,18 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
               }]);
               
               // Scroll to bottom of chat
-              if (chatContainerRef.current) {
-                setTimeout(() => {
-                  if (chatContainerRef.current) {
-                    chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-                  }
-                }, 100);
-              }
+              setTimeout(() => {
+                if (chatContainerRef.current) {
+                  chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+                }
+              }, 100);
             }
           });
           
           // Listen for status updates (mic/camera toggle)
           channel.on('broadcast', { event: 'status-update' }, (payload) => {
             if (payload.payload) {
+              console.log('VideoCall: Status update received:', payload.payload);
               setParticipants(prev => 
                 prev.map(p => {
                   if (p.id === payload.payload.id) {
@@ -163,9 +172,12 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
           // Listen for title updates
           channel.on('broadcast', { event: 'title-update' }, (payload) => {
             if (payload.payload && payload.payload.title !== undefined) {
+              console.log('VideoCall: Title update received:', payload.payload.title);
               setVideoTitle(payload.payload.title);
             }
           });
+        } else {
+          console.error('VideoCall: Failed to subscribe to channel:', status);
         }
       });
 
@@ -184,7 +196,7 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
     }
   }, [sessionId, username, email, hasStartedSession, isHost, isVideoOn, isAudioOn]);
 
-  // Handle audio/video status changes
+  // Handle audio/video status changes with optimized updates
   useEffect(() => {
     if (hasStartedSession) {
       // Update local stream tracks
@@ -198,19 +210,24 @@ const VideoCall = ({ sessionId, username, email, isHost, onExit }: VideoCallProp
         });
       }
       
-      // Broadcast status update to other participants
-      const channel = supabase.channel(`session-${sessionId}`);
-      channel.send({
-        type: 'broadcast',
-        event: 'status-update',
-        payload: {
-          id: participantId,
-          isVideoOn,
-          isAudioOn
-        }
-      });
+      // Debounced status update to reduce network calls
+      const timeoutId = setTimeout(() => {
+        const channel = supabase.channel(`live-session-${sessionId}`);
+        channel.send({
+          type: 'broadcast',
+          event: 'status-update',
+          payload: {
+            id: participantId,
+            isVideoOn,
+            isAudioOn
+          }
+        });
+        console.log('VideoCall: Status update sent:', { isVideoOn, isAudioOn });
+      }, 300);
+      
+      return () => clearTimeout(timeoutId);
     }
-  }, [isAudioOn, isVideoOn, email, sessionId, hasStartedSession]);
+  }, [isAudioOn, isVideoOn, participantId, sessionId, hasStartedSession]);
 
   const initializeMediaStreams = async () => {
     try {

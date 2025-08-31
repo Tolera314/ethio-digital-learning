@@ -171,19 +171,25 @@ const LiveSessions = () => {
   const { role } = useRole();
   const navigate = useNavigate();
 
-  // Load sessions from database
+  // Load sessions from database with error handling
   useEffect(() => {
     async function loadSessions() {
       try {
         setLoading(true);
+        console.log('LiveSessions: Loading sessions...');
         
-        // Load live sessions
-        const { data: sessions, error } = await (supabase as any)
+        // Load live sessions with better error handling
+        const { data: sessions, error } = await supabase
           .from('live_sessions')
           .select('*')
           .order('start_time', { ascending: true });
 
-        if (error) throw error;
+        if (error) {
+          console.error('LiveSessions: Database error:', error);
+          throw error;
+        }
+
+        console.log('LiveSessions: Loaded sessions:', sessions?.length || 0);
 
         const now = new Date();
         const upcoming = sessions?.filter(s => new Date(s.start_time) > now) || [];
@@ -192,21 +198,23 @@ const LiveSessions = () => {
         setUpcomingSessions(upcoming);
         setPastSessions(past);
 
-        // Get user data
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          const email = session.user.email || "";
-          const username = session.user.user_metadata?.name || 
-                          session.user.user_metadata?.full_name || 
-                          session.user.email?.split('@')[0] || "";
+        // Get user data with better fallbacks
+        const { data: { session: authSession } } = await supabase.auth.getSession();
+        if (authSession?.user) {
+          const email = authSession.user.email || "";
+          const username = authSession.user.user_metadata?.name || 
+                          authSession.user.user_metadata?.full_name || 
+                          authSession.user.email?.split('@')[0] || 
+                          "User";
           
+          console.log('LiveSessions: User data loaded:', { username, email: email ? '[set]' : '[not set]' });
           setUserData({ username, email });
         }
       } catch (error) {
-        console.error("Error loading sessions:", error);
+        console.error("LiveSessions: Error loading sessions:", error);
         toast({
           title: "Error",
-          description: "Failed to load sessions",
+          description: "Failed to load sessions. Please check your connection.",
           variant: "destructive"
         });
       } finally {
@@ -214,7 +222,12 @@ const LiveSessions = () => {
       }
     }
 
-    loadSessions();
+    if (user) {
+      loadSessions();
+    } else {
+      console.log('LiveSessions: No user found, skipping session load');
+      setLoading(false);
+    }
   }, [user, toast]);
 
   const handleCreateSession = async (newSession: any) => {

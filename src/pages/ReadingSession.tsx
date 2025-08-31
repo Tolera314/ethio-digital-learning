@@ -116,18 +116,21 @@ const ReadingSessionPage = () => {
     enabled: !!sessionId,
   });
   
-  // Set up realtime subscription for comments
+  // Set up optimized realtime subscription for comments and participants
   useEffect(() => {
     if (!sessionId) return;
     
+    console.log('ReadingSession: Setting up realtime subscriptions for session:', sessionId);
+    
     const channel = supabase
-      .channel('schema-db-changes')
+      .channel(`reading-session-changes-${sessionId}`)
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
         table: 'session_comments',
         filter: `session_id=eq.${sessionId}`
-      }, () => {
+      }, (payload) => {
+        console.log('ReadingSession: Comment change detected:', payload.eventType);
         refetchComments();
       })
       .on('postgres_changes', {
@@ -135,12 +138,16 @@ const ReadingSessionPage = () => {
         schema: 'public',
         table: 'session_participants',
         filter: `session_id=eq.${sessionId}`
-      }, () => {
+      }, (payload) => {
+        console.log('ReadingSession: Participant change detected:', payload.eventType);
         refetchParticipants();
       })
-      .subscribe();
+      .subscribe((status) => {
+        console.log('ReadingSession: Subscription status:', status);
+      });
       
     return () => {
+      console.log('ReadingSession: Cleaning up realtime subscriptions');
       supabase.removeChannel(channel);
     };
   }, [sessionId, refetchComments, refetchParticipants]);

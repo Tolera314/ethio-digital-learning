@@ -26,7 +26,7 @@ export const useRole = () => {
           .maybeSingle();
 
         if (error) {
-          console.error('Error fetching user role:', error);
+          console.warn('Failed to fetch user role:', error.message);
           setRole('student'); // Default fallback
         } else if (data) {
           setRole(data.role as UserRole);
@@ -35,7 +35,7 @@ export const useRole = () => {
           setRole('student');
         }
       } catch (error) {
-        console.error('Error fetching user role:', error);
+        console.warn('Failed to fetch user role:', error);
         setRole('student'); // Default fallback
       } finally {
         setLoading(false);

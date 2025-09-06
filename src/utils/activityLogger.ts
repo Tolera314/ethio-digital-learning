@@ -67,8 +67,7 @@ export const logActivity = async (
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) {
-      console.error('No authenticated user found when logging activity');
-      return;
+      return; // Silently return for unauthenticated users
     }
 
     const { error } = await supabase.from('user_activities').insert({
@@ -80,10 +79,12 @@ export const logActivity = async (
     });
 
     if (error) {
-      console.error('Error logging activity:', error);
+      console.warn('Activity logging failed:', error.message);
+      // Don't throw - activity logging shouldn't break user flows
     }
   } catch (error) {
-    console.error('Error logging activity:', error);
+    console.warn('Activity logging failed:', error);
+    // Don't throw - activity logging shouldn't break user flows
   }
 };
 
@@ -97,14 +98,17 @@ export const getUserActivitySummary = async () => {
       return getDefaultSummary();
     }
 
-    // Get all user activities
+    // Get all user activities with error handling
     const { data: activities, error } = await supabase
       .from('user_activities')
       .select('*')
       .eq('user_id', session.user.id)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.warn('Failed to fetch user activities:', error.message);
+      return getDefaultSummary();
+    }
 
     // Calculate comprehensive stats
     const totalActivities = activities?.length || 0;

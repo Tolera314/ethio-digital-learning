@@ -16,6 +16,7 @@ import { Book as BookType } from "@/types/library";
 import { formatDistance } from "date-fns";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
+import { useRealtimeData } from "@/hooks/useRealtimeData";
 
 const ReadingSessionPage = () => {
   const { bookId, sessionId } = useParams<{ bookId: string; sessionId: string }>();
@@ -34,7 +35,7 @@ const ReadingSessionPage = () => {
       if (!sessionId) throw new Error("Session ID is required");
       
       const { data, error } = await supabase
-        .from("reading_sessions" as any)
+        .from("reading_sessions")
         .select("*")
         .eq("id", sessionId)
         .single();
@@ -70,7 +71,7 @@ const ReadingSessionPage = () => {
       if (!sessionId) throw new Error("Session ID is required");
       
       const { data, error } = await supabase
-        .from("session_participants" as any)
+        .from("session_participants")
         .select("*")
         .eq("session_id", sessionId);
         
@@ -105,7 +106,7 @@ const ReadingSessionPage = () => {
       if (!sessionId) throw new Error("Session ID is required");
       
       const { data, error } = await supabase
-        .from("session_comments" as any)
+        .from("session_comments")
         .select("*")
         .eq("session_id", sessionId)
         .order("created_at", { ascending: true });
@@ -159,7 +160,7 @@ const ReadingSessionPage = () => {
       
       try {
         await supabase
-          .from("session_participants" as any)
+          .from("session_participants")
           .update({
             last_active_at: new Date().toISOString(),
             current_page: currentPage,
@@ -186,7 +187,7 @@ const ReadingSessionPage = () => {
     
     try {
       const { error } = await supabase
-        .from("session_participants" as any)
+        .from("session_participants")
         .insert({
           session_id: sessionId,
           user_id: user.id,
@@ -215,7 +216,7 @@ const ReadingSessionPage = () => {
     
     try {
       const { error } = await supabase
-        .from("session_comments" as any)
+        .from("session_comments")
         .insert({
           session_id: sessionId,
           user_id: user.id,

@@ -8,7 +8,7 @@ import PageLayout from "@/components/PageLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CreateSessionModal from "@/components/CreateSessionModal";
 import JoinSessionModal from "@/components/JoinSessionModal";
-import VideoCall from "@/components/VideoCall";
+import OptimizedVideoCall from "@/components/OptimizedVideoCall";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
@@ -233,7 +233,7 @@ const LiveSessions = () => {
   const handleCreateSession = async (newSession: any) => {
     try {
       // Save to database
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('live_sessions')
         .insert({
           title: newSession.title,
@@ -330,7 +330,7 @@ const LiveSessions = () => {
         backgroundImage="https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=1200&q=80"
       >
         <div className="w-full max-w-7xl mx-auto">
-          <VideoCall
+          <OptimizedVideoCall
             sessionId={selectedSession.id.toString()}
             username={userData.username}
             email={userData.email}

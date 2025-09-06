@@ -781,6 +781,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_reading_session: {
+        Args: { session_uuid: string }
+        Returns: boolean
+      }
       check_rate_limit: {
         Args: {
           _endpoint: string
